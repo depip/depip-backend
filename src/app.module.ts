@@ -4,9 +4,9 @@ import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
 import { SmartContractsProcessor } from './processor/smart-contracts.processor';
-import { BlockSync, TokenMarkets, SyncStatus } from './entities';
+import { BlockSync, TokenMarkets, SyncStatus, IPAassets } from './entities';
 import { BlockSyncRepository } from './repositories/block-sync.repository';
-// import { SyncTokenService } from './services/sync-token.service';
+import { IPAassetsRepository } from './repositories/ipasset.repository';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 // import { TokenMarketsRepository } from './repositories/token-markets.repository';
@@ -16,11 +16,12 @@ import { SyncStatusRepository } from './repositories/sync-status.repository';
 import { SyncTaskService } from './services/sync-task.service';
 
 const controllers = [];
-const entities = [BlockSync, SyncStatus, TokenMarkets, SoulboundToken];
+const entities = [BlockSync, SyncStatus, TokenMarkets, IPAassets];
 
 const repositories = [
   BlockSyncRepository,
   SyncStatusRepository,
+  IPAassetsRepository,
 ];
 
 const services = [SyncTaskService];

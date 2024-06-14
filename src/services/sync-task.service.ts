@@ -7,15 +7,19 @@ import {
   NODE_API,
   QUEUES,
 } from '../common/constants/app.constant';
-import { BlockSync } from '../entities';
+import { BlockSync, IPAassets } from '../entities';
 import { SyncDataHelpers } from '../helpers/sync-data.helpers';
 import { BlockSyncRepository } from '../repositories/block-sync.repository';
+import { IPAassetsRepository } from '../repositories/ipasset.repository';
 import { ENV_CONFIG } from '../shared/services/config.service';
 import { CommonUtil } from '../utils/common.util';
 import { InjectQueue } from '@nestjs/bull';
 import { BackoffOptions, JobOptions, Queue } from 'bull';
 import { SyncStatusRepository } from '../repositories/sync-status.repository';
-import { getLastestBlockNumber } from '../web3';
+import { getLastestBlockNumber, Contract, getPastEventsByContract } from '../web3';
+import  IPAssetRegistryABI  from "../web3/ABI/IPAssetRegistry.json"
+import { AbiItem } from 'web3-utils'
+import { config } from 'process';
 
 @Injectable()
 export class SyncTaskService {
@@ -30,6 +34,7 @@ export class SyncTaskService {
   constructor(
     private _commonUtil: CommonUtil,
     private blockSyncRepository: BlockSyncRepository,
+    private ipaassetsRepository: IPAassetsRepository,
     private statusRepository: SyncStatusRepository,
     @InjectSchedule() private readonly schedule: Schedule,
     @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
@@ -45,7 +50,7 @@ export class SyncTaskService {
   }
 
   /**
-   * Get latest block to insert Block Sync Error table
+   * Get latest block to insert Block Sync table
    */
   @Interval(ENV_CONFIG.TIMES_SYNC)
   async cronSync() {
@@ -57,28 +62,22 @@ export class SyncTaskService {
         getLastestBlockNumber(),
       ]);
       this._logger.log(`currentBlock: ` + currentBlock);
+      this._logger.log(`lastBlock.lastBlock: ` + lastBlock.lastBlock);
       var toBlock = Number(currentBlock)
-      var fromBlock = Number(currentBlock) - 100    
+      var fromBlock = Number(currentBlock)  
       
-      fromBlock = lastBlock
+      fromBlock = lastBlock.lastBlock || fromBlock
       toBlock = fromBlock + 100
       
       if (toBlock > currentBlock) {
           toBlock = Number(currentBlock)
       }      
 
-      if (currentBlock > lastBlock) {
-        const blockSync = new BlockSync();
-        blockSync.id = "IPAsset";
-        blockSync.lastBlock = toBlock;
-        blocks.push(blockSync);
+      if (currentBlock > fromBlock) {
+        await this.processBlock(fromBlock, toBlock, "0xd43fE0d865cb5C26b1351d3eAf2E3064BE3276F6");
+        this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);        
       }
-      if (blocks.length > 0) {
-        this._logger.log(`Insert data to database`);
-        await this.blockSyncRepository.insertOnDuplicate(blocks, [
-          'id',
-        ]);
-      }
+
     } catch (error) {
       this._logger.log(
         `error when generate base blocks:${fromBlock}`,
@@ -89,129 +88,62 @@ export class SyncTaskService {
   }
 
   /**
-   * Procces block insert data to db
+   * Upate current height of block
+   * @param newLastBlock
    */
-  // @Interval(3000)
-  // async processBlock() {
-  //   // Get the highest block and insert into SyncBlockError
-  //   try {
-  //     const results = await this.blockSyncRepository.find({
-  //       order: {
-  //         height: 'asc',
-  //       },
-  //       take: this.threads,
-  //     });
-  //     results.forEach((el) => {
-  //       try {
-  //         this.schedule.scheduleTimeoutJob(
-  //           el.height.toString(),
-  //           100,
-  //           async () => {
-  //             try {
-  //               await this.handleSyncData(el.height, true);
-  //             } catch (error) {
-  //               this._logger.log('Error when process blocks height', el.height);
-  //               return true;
-  //             }
-  //             return true;
-  //           },
-  //           {
-  //             maxRetry: -1,
-  //           },
-  //         );
-  //       } catch (error) {
-  //         this.schedule.cancelJob(el?.height?.toString());
-  //         this._logger.log('Catch duplicate height ', error.stack);
-  //       }
-  //     });
-  //   } catch (error) {
-  //     this._logger.log('error when process blocks', error.stack);
-  //     throw error;
-  //   }
-  // }
-
-  async handleSyncData(syncBlock: number, recallSync = false): Promise<any> {
-    this._logger.log(
-      null,
-      `Class ${SyncTaskService.name}, call handleSyncData method with prameters: {syncBlock: ${syncBlock}}`,
-    );
-
-    try {
-      // fetching block from node
-      const paramsBlock = `block?height=${syncBlock}`;
-      const blockData = await this._commonUtil.getDataRPC(
-        this.rpc,
-        paramsBlock,
-      );
-
-      //Insert block error table
-      // if (!recallSync) {
-      //   await this.insertBlockError(syncBlock);
-
-      //   // Mark schedule is running
-      //   this.schedulesSync.push(syncBlock);
-      // }
-
-      if (blockData.block.data.txs && blockData.block.data.txs.length > 0) {
-        const listTransactions = [];
-        let txDatas = [];
-        const txs = [];
-        for (const key in blockData.block.data.txs) {
-          const element = blockData.block.data.txs[key];
-          const txHash = sha256(Buffer.from(element, 'base64')).toUpperCase();
-          const paramsTx = `cosmos/tx/v1beta1/txs/${txHash}`;
-          txs.push(this._commonUtil.getDataAPI(this.api, paramsTx));
-        }
-
-        txDatas = await Promise.all(txs);
-        // create transaction
-        const txLength = blockData.block.data.txs?.length || 0;
-        for (let i = 0; i < txLength; i++) {
-          const txData = txDatas[i];
-          const [txType] = SyncDataHelpers.makeTxRawLogData(txData);
-
-          // Check to push into list transaction
-          const txTypeCheck = txType.substring(txType.lastIndexOf('.') + 1);
-          if (
-            txData.tx_response.code === 0 &&
-            (<any>Object).values(CONST_MSG_TYPE).includes(txTypeCheck)
-          ) {
-            listTransactions.push(txData);
-          }
-        }
-      }
-
-      // Update current block
-      await this.updateStatus(syncBlock);
-
-      const idxSync = this.schedulesSync.indexOf(syncBlock);
-      if (idxSync > -1) {
-        this.schedulesSync.splice(idxSync, 1);
-      }
-    } catch (error) {
-      this._logger.error(
-        null,
-        `Sync Blocked & Transaction were error height: ${syncBlock}, ${error.name}: ${error.message}`,
-      );
-      this._logger.error(null, `${error.stack}`);
-
-      const idxSync = this.schedulesSync.indexOf(syncBlock);
-      if (idxSync > -1) {
-        this.schedulesSync.splice(idxSync, 1);
-      }
-      throw new Error(error);
+  async updateStatus(newLastBlock, id) {
+    const lastBlock = await this.blockSyncRepository.findOne({ contract: id });
+    if(!lastBlock){
+        const blockSync = new BlockSync();
+        blockSync.contract = id;
+        blockSync.lastBlock = newLastBlock;
+        await this.blockSyncRepository.create(blockSync);
+    }else{
+      lastBlock.lastBlock = newLastBlock;
+      await this.blockSyncRepository.create(lastBlock);
     }
   }
 
   /**
-   * Upate current height of block
+   * Process block
    * @param newLastBlock
    */
-  async updateStatus(newLastBlock) {
-    const status = await this.statusRepository.findOne();
-    if (newLastBlock > status.current_block) {
-      status.current_block = newLastBlock;
-      await this.statusRepository.create(status);
-    }
-  }
+  async processBlock(fromBlock, toBlock, contract) {
+    const ipassetContract = Contract(
+      contract,
+      IPAssetRegistryABI as AbiItem[]
+    );
+
+    this._logger.log(`fromBlock: ` + fromBlock);
+    this._logger.log(`toBlock: ` + toBlock);
+    var newIPassets: any = await ipassetContract.getPastEvents('IPRegistered', {fromBlock:fromBlock, toBlock: toBlock})
+    const ipaassets = [];
+    await Promise.all(newIPassets.map(newIPasset => new Promise(async (resolve, reject) => {
+      try {
+        console.log(newIPasset)
+        const ipaasset = new IPAassets();
+        ipaasset.contract_address = newIPasset.returnValues.tokenContract;
+        ipaasset.token_id = newIPasset.returnValues.tokenId;
+        ipaasset.chain_id = newIPasset.returnValues.chainId;
+        ipaasset.ip_id = newIPasset.returnValues.ipId;
+        ipaasset.name = newIPasset.returnValues.name;
+        ipaasset.uri = newIPasset.returnValues.uri;
+        ipaasset.registration_date = newIPasset.returnValues.registrationDate;
+        ipaassets.push(ipaasset);
+        resolve(ipaassets)
+      }
+      catch (ex) {
+          console.error(ex)
+          reject(null)
+      }
+    }))) 
+
+    if (ipaassets.length > 0) {
+      this._logger.log(`Insert data to database`);
+      await this.ipaassetsRepository.insertOnDuplicate(ipaassets, [
+        'id',
+      ]);
+    }    
+
+  }  
 }

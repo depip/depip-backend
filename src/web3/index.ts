@@ -1,7 +1,13 @@
 import {Web3} from "web3";
 import { ENV_CONFIG } from '../shared/services/config.service';
+import  IPAssetRegistryABI  from "./ABI/IPAssetRegistry.json"
+import { AbiItem } from 'web3-utils'
 
-const web3 = new Web3(ENV_CONFIG.NODE.RPC) 
+// const web3 = new Web3(ENV_CONFIG.NODE.RPC) 
+
+export const web3 = new Web3(
+    new Web3.providers.HttpProvider(ENV_CONFIG.NODE.RPC)
+);
 
 export async function getLastestBlockNumber() {
     return await web3.eth.getBlockNumber()
@@ -9,51 +15,30 @@ export async function getLastestBlockNumber() {
 
 export const ADDRESS_0 = '0x0000000000000000000000000000000000000000'
 
-// export const UniversalContract = (network) => Contract(network.RPC, network.UNIVERSAL, TomoBridgeUniversalABI)
+export function Contract(address: string, abi: any) {
+    return new web3.eth.Contract(abi, address)
+}
 
-// export async function getSwapLogEventByTxHash(network, txHash: string) {
-//     let web3 = Web3(network.RPC)
-//     let eventName = ['LogDeposit', 'LogWithdraw']
-//     var transaction = await web3.eth.getTransactionReceipt(txHash)
+export async function getPastEventsByContract(fromBlock, toBlock, contract) {
+    const ipassetContract = new web3.eth.Contract(IPAssetRegistryABI as AbiItem[], contract );
+    let options = {
+        fromBlock: 6101840,//fromBlock, //Number || "earliest" || "pending" || "latest"
+        toBlock: 6102072//toBlock
+    }; 
 
-//     var events = []
-//     for(var i = 0; i < eventName.length; i++){
-//         var eventLogs = TomoBridgeUniversalABI.find(e => e.name == eventName[i])
-//         var eventSignature = web3.eth.abi.encodeEventSignature(eventLogs as any)   
+    var newIPasset = await ipassetContract.getPastEvents('allEvents', options)
 
-//         let event = transaction.logs
-//             .filter(e => e.topics[0] == eventSignature)
-//             .map(log => web3.eth.abi.decodeLog(eventLogs.inputs, log.data, log.topics.slice(1)))
+    await Promise.all(newIPasset.map(newIPassetEvent => new Promise(async (resolve, reject) => {
+        try {
 
-//         if(event.length > 0){
-//             events = [...events, ...event]
-//         }
-
-        
-//     }
-//     return events
-// }
-
-// export async function getClaimLogEventByTxHash(network, txHash: string) {
-//     let web3 = Web3(network.RPC)
-//     let eventName = ['LogExecMintTX', 'LogExecBurnTX']
-
-//     var transaction = await web3.eth.getTransactionReceipt(txHash)
-
-//     var events = []
-//     for(var i = 0; i < eventName.length; i++){
-//         var eventLogs = TomoBridgeUniversalABI.find(e => e.name == eventName[i])
-//         var eventSignature = web3.eth.abi.encodeEventSignature(eventLogs as any)   
-
-//         let event = transaction.logs
-//             .filter(e => e.topics[0] == eventSignature)
-//             .map(log => web3.eth.abi.decodeLog(eventLogs.inputs, log.data, log.topics.slice(1)))
-
-//         if(event.length > 0){
-//             events = [...events, ...event]
-//         }
-
-        
-//     }
-//     return events
-// }
+            console.log("Events added: " );  
+            resolve(null)
+        }
+        catch (ex) {
+            console.error(ex)
+            reject(null)
+        }
+    })))    
+    console.log(`newIPasset: ` + JSON.stringify(newIPasset));
+    return newIPasset
+}
