@@ -70,7 +70,12 @@ export class ConfigService {
         LICENSE: process.env.LICENSE_ADDRESS,
         ROYALTY: process.env.ROYALTY_ADDRESS,
         DISTUPE: process.env.DISTUPE_ADDRESS,
-      },      
+      },    
+      STORY_PROTOCOL_SYNC: {
+        IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
+        LICENSE_SYNC: process.env.LICENSE_SYNC || "License",
+        DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
+      },          
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,
         COIN_MINIMAL_DENOM: process.env.COIN_MINIMAL_DENOM,
@@ -101,12 +106,6 @@ export class ConfigService {
             : 'aura-network,bitcoin',
         MAX_REQUEST: Number(process.env.MAX_REQUEST) || 250,
         COIN_MARKET_CAP_PLATFORM: process.env.PLATFORM || 'ethereum',
-      },
-      SYNC_SMART_CONTRACT: {
-        FROM_HEIGHT: Number(process.env.SYNC_SMART_CONTRACT_FROM_HEIGHT) || 0,
-        TO_HEIGHT: Number(process.env.SYNC_SMART_CONTRACT_TO_HEIGHT) || 0,
-        SYNC_DATA:
-          process.env.SYNC_SMART_CONTRACT_SYNC_DATA === 'true' ? true : false,
       },
       NODE_ENV: process.env.NODE_ENV,
       IPFS_URL: process.env.IPFS_URL || 'https://ipfs.io/',

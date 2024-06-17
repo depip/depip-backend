@@ -53,7 +53,6 @@ export class SyncIPAssetService {
   @Interval(ENV_CONFIG.TIMES_SYNC)
   async cronSync() {
     // Get the highest block and insert into SyncBlock
-    const blocks = [];
     try {
       const [lastBlock, currentBlock] = await Promise.all([
         this.blockSyncRepository.max('lastBlock'),

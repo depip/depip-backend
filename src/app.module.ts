@@ -3,7 +3,6 @@ import { BullModule } from '@nestjs/bull';
 import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
-import { SmartContractsProcessor } from './processor/smart-contracts.processor';
 import { BlockSync, IPAassets } from './entities';
 import { BlockSyncRepository } from './repositories/block-sync.repository';
 import { IPAassetsRepository } from './repositories/ipasset.repository';
@@ -22,7 +21,7 @@ const repositories = [
 
 const services = [SyncIPAssetService];
 
-const processors = [SmartContractsProcessor];
+const processors = [];
 
 @Module({
   imports: [
