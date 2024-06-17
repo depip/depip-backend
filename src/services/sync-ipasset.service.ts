@@ -55,13 +55,14 @@ export class SyncIPAssetService {
     // Get the highest block and insert into SyncBlock
     try {
       const [lastBlock, currentBlock] = await Promise.all([
-        this.blockSyncRepository.max('lastBlock'),
+        this.blockSyncRepository.max('last_block') || 0,
         getLastestBlockNumber(),
       ]);
+
       var toBlock = Number(currentBlock)
-      var fromBlock = Number(currentBlock)  
+      var fromBlock = Number(currentBlock) - 100
       
-      fromBlock = lastBlock.lastBlock || fromBlock
+      fromBlock = lastBlock.last_block || fromBlock
       toBlock = fromBlock + 100
       
       if (toBlock > currentBlock) {
@@ -91,10 +92,10 @@ export class SyncIPAssetService {
     if(!lastBlock){
         const blockSync = new BlockSync();
         blockSync.contract = id;
-        blockSync.lastBlock = newLastBlock;
+        blockSync.last_block = newLastBlock;
         await this.blockSyncRepository.create(blockSync);
     }else{
-      lastBlock.lastBlock = newLastBlock;
+      lastBlock.last_block = newLastBlock;
       await this.blockSyncRepository.create(lastBlock);
     }
   }
@@ -134,7 +135,7 @@ export class SyncIPAssetService {
 
     if (ipaassets.length > 0) {
       this._logger.log(`Insert data to database`);
-      await this.ipaassetsRepository.insertOnDuplicate(ipaassets, [
+      await this.ipaassetsRepository.upsert(ipaassets, [
         'id',
       ]);
     }    

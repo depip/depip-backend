@@ -128,18 +128,19 @@ export class ConfigService {
     return {
       entities,
       migrations,
-      type: DATABASE_TYPE.MYSQL,
+      type: DATABASE_TYPE.POSTGRES,
       host: this.get('DB_HOST'),
       port: this.getNumber('DB_PORT'),
       username: this.get('DB_USER'),
       password: this.get('DB_PASS'),
       database: this.get('DB_NAME'),
       migrationsRun: true,
-      connectTimeout: 1000,
+      // connectTimeout: 1000,
       synchronize: true,
       logging: this.get('DB_LOGGING') === 'true',
-      namingStrategy: new PascalCaseStrategy(),
-      multipleStatements: true,
+      // namingStrategy: new PascalCaseStrategy(),
+      // multipleStatements: true,
+      // migrationsTransactionMode: 'each',
     };
   }
 }

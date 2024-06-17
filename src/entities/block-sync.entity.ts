@@ -10,6 +10,6 @@ export class BlockSync extends BaseEntity {
   @Column({ name: 'contract' })
   contract: string;
 
-  @Column()
-  lastBlock: number;
+  @Column({ name: 'last_block' })
+  last_block: number;
 }
