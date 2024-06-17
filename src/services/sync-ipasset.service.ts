@@ -15,15 +15,14 @@ import { ENV_CONFIG } from '../shared/services/config.service';
 import { CommonUtil } from '../utils/common.util';
 import { InjectQueue } from '@nestjs/bull';
 import { BackoffOptions, JobOptions, Queue } from 'bull';
-import { SyncStatusRepository } from '../repositories/sync-status.repository';
 import { getLastestBlockNumber, Contract, getPastEventsByContract } from '../web3';
 import  IPAssetRegistryABI  from "../web3/ABI/IPAssetRegistry.json"
 import { AbiItem } from 'web3-utils'
 import { config } from 'process';
 
 @Injectable()
-export class SyncTaskService {
-  private readonly _logger = new Logger(SyncTaskService.name);
+export class SyncIPAssetService {
+  private readonly _logger = new Logger(SyncIPAssetService.name);
   private rpc;
   private api;
   private threads = 0;
@@ -35,7 +34,6 @@ export class SyncTaskService {
     private _commonUtil: CommonUtil,
     private blockSyncRepository: BlockSyncRepository,
     private ipaassetsRepository: IPAassetsRepository,
-    private statusRepository: SyncStatusRepository,
     @InjectSchedule() private readonly schedule: Schedule,
     @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
   ) {
@@ -61,8 +59,6 @@ export class SyncTaskService {
         this.blockSyncRepository.max('lastBlock'),
         getLastestBlockNumber(),
       ]);
-      this._logger.log(`currentBlock: ` + currentBlock);
-      this._logger.log(`lastBlock.lastBlock: ` + lastBlock.lastBlock);
       var toBlock = Number(currentBlock)
       var fromBlock = Number(currentBlock)  
       
@@ -120,7 +116,6 @@ export class SyncTaskService {
     const ipaassets = [];
     await Promise.all(newIPassets.map(newIPasset => new Promise(async (resolve, reject) => {
       try {
-        console.log(newIPasset)
         const ipaasset = new IPAassets();
         ipaasset.contract_address = newIPasset.returnValues.tokenContract;
         ipaasset.token_id = newIPasset.returnValues.tokenId;

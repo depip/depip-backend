@@ -4,27 +4,23 @@ import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
 import { SmartContractsProcessor } from './processor/smart-contracts.processor';
-import { BlockSync, TokenMarkets, SyncStatus, IPAassets } from './entities';
+import { BlockSync, IPAassets } from './entities';
 import { BlockSyncRepository } from './repositories/block-sync.repository';
 import { IPAassetsRepository } from './repositories/ipasset.repository';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
-// import { TokenMarketsRepository } from './repositories/token-markets.repository';
-// import { SoulboundTokenRepository } from './repositories/soulbound-token.repository';
-import { SoulboundToken } from './entities/soulbound-token.entity';
-import { SyncStatusRepository } from './repositories/sync-status.repository';
-import { SyncTaskService } from './services/sync-task.service';
+
+import { SyncIPAssetService } from './services/sync-ipasset.service';
 
 const controllers = [];
-const entities = [BlockSync, SyncStatus, TokenMarkets, IPAassets];
+const entities = [BlockSync, IPAassets];
 
 const repositories = [
   BlockSyncRepository,
-  SyncStatusRepository,
   IPAassetsRepository,
 ];
 
-const services = [SyncTaskService];
+const services = [SyncIPAssetService];
 
 const processors = [SmartContractsProcessor];
 
