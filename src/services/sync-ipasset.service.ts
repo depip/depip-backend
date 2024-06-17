@@ -70,7 +70,7 @@ export class SyncIPAssetService {
       }      
 
       if (currentBlock > fromBlock) {
-        await this.processBlock(fromBlock, toBlock, "0xd43fE0d865cb5C26b1351d3eAf2E3064BE3276F6");
+        await this.processBlock(fromBlock, toBlock, ENV_CONFIG.STORY_PROTOCOL_CONTRACT.IPASSET);
         this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);        
       }
 
