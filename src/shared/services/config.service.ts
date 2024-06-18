@@ -43,6 +43,7 @@ export class ConfigService {
       START_HEIGHT: process.env.START_HEIGHT,
       TIMES_SYNC: Number(process.env.TIMES_SYNC) || 3000,
       IPASSET_SYNC: Number(process.env.IPASSET_SYNC) || "IPAsset",
+      TOKENLICENSE_SYNC: Number(process.env.LICENSE_SYNC) || "TokenLicense",
       SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(
         process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8,
       ),

@@ -14,14 +14,17 @@ import { SharedModule } from './shared/shared.module';
 import { SoulboundToken } from './entities/soulbound-token.entity';
 import { SyncStatusRepository } from './repositories/sync-status.repository';
 import { SyncTaskService } from './services/sync-task.service';
+import { LicenseTokenRepository } from './repositories/licensetoken.repository';
+import { LicenseToken } from './entities/license-token.entity';
 
 const controllers = [];
-const entities = [BlockSync, SyncStatus, TokenMarkets, IPAassets];
+const entities = [BlockSync, SyncStatus, TokenMarkets, IPAassets, LicenseToken];
 
 const repositories = [
   BlockSyncRepository,
   SyncStatusRepository,
   IPAassetsRepository,
+  LicenseTokenRepository
 ];
 
 const services = [SyncTaskService];

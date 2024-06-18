@@ -11,6 +11,7 @@ import { BlockSync, IPAassets } from '../entities';
 import { SyncDataHelpers } from '../helpers/sync-data.helpers';
 import { BlockSyncRepository } from '../repositories/block-sync.repository';
 import { IPAassetsRepository } from '../repositories/ipasset.repository';
+import { LicenseTokenRepository } from '../repositories/licensetoken.repository';
 import { ENV_CONFIG } from '../shared/services/config.service';
 import { CommonUtil } from '../utils/common.util';
 import { InjectQueue } from '@nestjs/bull';
@@ -20,6 +21,8 @@ import { getLastestBlockNumber, Contract, getPastEventsByContract } from '../web
 import  IPAssetRegistryABI  from "../web3/ABI/IPAssetRegistry.json"
 import { AbiItem } from 'web3-utils'
 import { config } from 'process';
+import { LicenseTokenABI } from 'src/web3/ABI/LicenseToken';
+import { LicenseToken } from 'src/entities/license-token.entity';
 
 @Injectable()
 export class SyncTaskService {
@@ -36,6 +39,7 @@ export class SyncTaskService {
     private blockSyncRepository: BlockSyncRepository,
     private ipaassetsRepository: IPAassetsRepository,
     private statusRepository: SyncStatusRepository,
+    private licenseTokenRepository: LicenseTokenRepository,
     @InjectSchedule() private readonly schedule: Schedule,
     @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
   ) {
@@ -66,16 +70,19 @@ export class SyncTaskService {
       var toBlock = Number(currentBlock)
       var fromBlock = Number(currentBlock)  
       
-      fromBlock = lastBlock.lastBlock || fromBlock
+      fromBlock = lastBlock.lastBlock || fromBlock - 100
       toBlock = fromBlock + 100
-      
+      // fromBlock = 6120290;
+      // toBlock = 6120299;
       if (toBlock > currentBlock) {
           toBlock = Number(currentBlock)
       }      
 
       if (currentBlock > fromBlock) {
         await this.processBlock(fromBlock, toBlock, "0xd43fE0d865cb5C26b1351d3eAf2E3064BE3276F6");
-        this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);        
+        this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);       
+        await this.processBlockLicense(fromBlock, toBlock);
+        this.updateStatus(toBlock, ENV_CONFIG.TOKENLICENSE_SYNC);   
       }
 
     } catch (error) {
@@ -113,7 +120,6 @@ export class SyncTaskService {
       contract,
       IPAssetRegistryABI as AbiItem[]
     );
-
     this._logger.log(`fromBlock: ` + fromBlock);
     this._logger.log(`toBlock: ` + toBlock);
     var newIPassets: any = await ipassetContract.getPastEvents('IPRegistered', {fromBlock:fromBlock, toBlock: toBlock})
@@ -145,5 +151,39 @@ export class SyncTaskService {
       ]);
     }    
 
+  }  
+  async processBlockLicense(fromBlock, toBlock) {
+    const licenseTokenContract = Contract(
+      '0x1333c78A821c9a576209B01a16dDCEF881cAb6f2',
+      LicenseTokenABI as AbiItem[]
+    );
+    this._logger.log(`[LICENSE TOKEN] fromBlock: ` + fromBlock);
+    this._logger.log(`[LICENSE TOKEN] toBlock: ` + toBlock);
+    var newLicenseTokens: any = await licenseTokenContract.getPastEvents('LicenseTokenMinted', {fromBlock:fromBlock, toBlock: toBlock})
+    const licenseTokens = [];
+    await Promise.all(newLicenseTokens.map(newLicenseToken => new Promise(async (resolve, reject) => {
+      try {
+        console.log(newLicenseToken)
+        const licenseToken = new LicenseToken();
+        licenseToken.signature = newLicenseToken.signature;
+        licenseToken.minter = newLicenseToken.returnValues.minter;
+        licenseToken.receiver = newLicenseToken.returnValues.receiver;
+        licenseToken.token_id = newLicenseToken.returnValues.tokenId;
+        licenseTokens.push(licenseToken);
+        resolve(licenseTokens)
+      }
+      catch (ex) {
+          console.error(ex)
+          reject(null)
+      }
+    }))) 
+  
+    if (licenseTokens.length > 0) {
+      this._logger.log(`Insert LICENSE TOKEN data to database`);
+      await this.licenseTokenRepository.insertOnDuplicate(licenseTokens, [
+        'id',
+      ]);
+    }    
+  
   }  
 }
