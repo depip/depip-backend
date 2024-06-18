@@ -34,8 +34,8 @@ export class SyncIPAssetService {
     private _commonUtil: CommonUtil,
     private blockSyncRepository: BlockSyncRepository,
     private ipaassetsRepository: IPAassetsRepository,
-    @InjectSchedule() private readonly schedule: Schedule,
-    @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
+    // @InjectSchedule() private readonly schedule: Schedule,
+    // @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
   ) {
     this._logger.log(
       '============== Constructor Sync Task Service ==============',
@@ -114,7 +114,7 @@ export class SyncIPAssetService {
     this._logger.log(`toBlock: ` + toBlock);
     var newIPassets: any = await ipassetContract.getPastEvents('IPRegistered', {fromBlock:fromBlock, toBlock: toBlock})
     const ipaassets = [];
-    await Promise.all(newIPassets.map(newIPasset => new Promise(async (resolve, reject) => {
+    await Promise.all(newIPassets.map(newIPasset => new Promise(async () => {
       try {
         const ipaasset = new IPAassets();
         ipaasset.contract_address = newIPasset.returnValues.tokenContract;
@@ -125,11 +125,9 @@ export class SyncIPAssetService {
         ipaasset.uri = newIPasset.returnValues.uri;
         ipaasset.registration_date = newIPasset.returnValues.registrationDate;
         ipaassets.push(ipaasset);
-        resolve(ipaassets)
       }
       catch (ex) {
           console.error(ex)
-          reject(null)
       }
     }))) 
 
