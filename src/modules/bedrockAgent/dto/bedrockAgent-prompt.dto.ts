@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class BedrockAgentOutput {
+export class BedrockAgentPrompt {
   @Expose()
   @ApiProperty()
+  prompt: string;
   sessionId: string;
-  completion: string;
 }

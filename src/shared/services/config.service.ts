@@ -37,6 +37,7 @@ export class ConfigService {
 
   get ENV_CONFIG() {
     return {
+      APP_PORT: process.env.PORT,
       WEBSOCKET_URL: process.env.WEBSOCKET_URL,
       THREADS: Number(process.env.THREADS),
       SMART_CONTRACT_SERVICE: process.env.SMART_CONTRACT_SERVICE,
@@ -65,6 +66,13 @@ export class ConfigService {
         API: process.env.API,
         RPC: process.env.RPC,
       },
+      BEDROCK: {
+        REGION: process.env.REGION,
+        ACCESSKEY: process.env.ACCESSKEY,
+        SECRET: process.env.SECRET,
+        AGENTID: process.env.AGENTID,
+        AGENTALIASID: process.env.AGENTALIASID,
+      },      
       STORY_PROTOCOL_CONTRACT: {
         IPASSET: process.env.IPASSET_ADDRESS,
         LICENSE: process.env.LICENSE_ADDRESS,

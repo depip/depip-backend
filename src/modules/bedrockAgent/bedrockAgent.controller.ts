@@ -14,14 +14,17 @@ import {
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { BedrockAgentService } from './bedrockAgent.service';
+import { BedrockAgentPrompt } from './dto/bedrockAgent-prompt.dto';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
-@Controller('user')
-@ApiTags('user')
+@Controller('bedrock')
+@ApiTags('bedrockAgent')
 export class BedrockAgentController {
   constructor(private readonly bedrockAgentSvc: BedrockAgentService) { }
 
-  @Get('available-quests')
-  getAvailableQuests() {
-    return this.bedrockAgentSvc.sendAskingText("1");
+  @Post("bedrock-agent")
+  // @UseInterceptors(CacheInterceptor)
+  bedrockAgent(@Body() data: BedrockAgentPrompt) {
+    return this.bedrockAgentSvc.sendAskingText(data.prompt, data.sessionId);
   }
 }
