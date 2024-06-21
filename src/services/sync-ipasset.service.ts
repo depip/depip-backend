@@ -71,7 +71,7 @@ export class SyncIPAssetService {
 
       if (currentBlock > fromBlock) {
         await this.processBlock(fromBlock, toBlock, ENV_CONFIG.STORY_PROTOCOL_CONTRACT.IPASSET);
-        this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);        
+        await this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);        
       }
 
     } catch (error) {
@@ -89,6 +89,8 @@ export class SyncIPAssetService {
    */
   async updateStatus(newLastBlock, id) {
     const lastBlock = await this.blockSyncRepository.findOne({ contract: id });
+    this._logger.log(`id: ` + id);
+    this._logger.log(`lastBlock: ` + lastBlock);
     if(!lastBlock){
         const blockSync = new BlockSync();
         blockSync.contract = id;
@@ -126,8 +128,12 @@ export class SyncIPAssetService {
         ipaasset.registration_date = newIPasset.returnValues.registrationDate;
         ipaassets.push(ipaasset);
       }
-      catch (ex) {
-          console.error(ex)
+      catch (error) {
+        this._logger.log(
+          `error when generate base blocks:${fromBlock}`,
+          error.stack,
+        );
+        throw error;
       }
     }))) 
 
