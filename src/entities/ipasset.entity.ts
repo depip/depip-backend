@@ -19,7 +19,7 @@ export class IPAassets extends BaseEntityIncrementId {
   @Column()
   name: string;
 
-  @Column()
+  @Column({length: 2000})
   uri: string;
 
   @Column()
