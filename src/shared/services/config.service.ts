@@ -37,12 +37,14 @@ export class ConfigService {
 
   get ENV_CONFIG() {
     return {
+      APP_PORT: process.env.PORT,
       WEBSOCKET_URL: process.env.WEBSOCKET_URL,
       THREADS: Number(process.env.THREADS),
       SMART_CONTRACT_SERVICE: process.env.SMART_CONTRACT_SERVICE,
       START_HEIGHT: process.env.START_HEIGHT,
       TIMES_SYNC: Number(process.env.TIMES_SYNC) || 3000,
       IPASSET_SYNC: Number(process.env.IPASSET_SYNC) || "IPAsset",
+      TOKENLICENSE_SYNC: Number(process.env.LICENSE_SYNC) || "TokenLicense",
       SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(
         process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8,
       ),
@@ -65,6 +67,24 @@ export class ConfigService {
         API: process.env.API,
         RPC: process.env.RPC,
       },
+      BEDROCK: {
+        REGION: process.env.REGION,
+        ACCESSKEY: process.env.ACCESSKEY,
+        SECRET: process.env.SECRET,
+        AGENTID: process.env.AGENTID,
+        AGENTALIASID: process.env.AGENTALIASID,
+      },      
+      STORY_PROTOCOL_CONTRACT: {
+        IPASSET: process.env.IPASSET_ADDRESS,
+        LICENSE: process.env.LICENSE_ADDRESS,
+        ROYALTY: process.env.ROYALTY_ADDRESS,
+        DISTUPE: process.env.DISTUPE_ADDRESS,
+      },    
+      STORY_PROTOCOL_SYNC: {
+        IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
+        LICENSE_SYNC: process.env.LICENSE_SYNC || "License",
+        DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
+      },          
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,
         COIN_MINIMAL_DENOM: process.env.COIN_MINIMAL_DENOM,
@@ -96,12 +116,6 @@ export class ConfigService {
         MAX_REQUEST: Number(process.env.MAX_REQUEST) || 250,
         COIN_MARKET_CAP_PLATFORM: process.env.PLATFORM || 'ethereum',
       },
-      SYNC_SMART_CONTRACT: {
-        FROM_HEIGHT: Number(process.env.SYNC_SMART_CONTRACT_FROM_HEIGHT) || 0,
-        TO_HEIGHT: Number(process.env.SYNC_SMART_CONTRACT_TO_HEIGHT) || 0,
-        SYNC_DATA:
-          process.env.SYNC_SMART_CONTRACT_SYNC_DATA === 'true' ? true : false,
-      },
       NODE_ENV: process.env.NODE_ENV,
       IPFS_URL: process.env.IPFS_URL || 'https://ipfs.io/',
       SYNC_MISSING_CONTRACT_CODE:
@@ -123,18 +137,19 @@ export class ConfigService {
     return {
       entities,
       migrations,
-      type: DATABASE_TYPE.MYSQL,
+      type: DATABASE_TYPE.POSTGRES,
       host: this.get('DB_HOST'),
       port: this.getNumber('DB_PORT'),
       username: this.get('DB_USER'),
       password: this.get('DB_PASS'),
       database: this.get('DB_NAME'),
       migrationsRun: true,
-      connectTimeout: 1000,
+      // connectTimeout: 1000,
       synchronize: true,
       logging: this.get('DB_LOGGING') === 'true',
-      namingStrategy: new PascalCaseStrategy(),
-      multipleStatements: true,
+      // namingStrategy: new PascalCaseStrategy(),
+      // multipleStatements: true,
+      // migrationsTransactionMode: 'each',
     };
   }
 }

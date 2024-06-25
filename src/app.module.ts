@@ -3,30 +3,29 @@ import { BullModule } from '@nestjs/bull';
 import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
-import { SmartContractsProcessor } from './processor/smart-contracts.processor';
-import { BlockSync, TokenMarkets, SyncStatus, IPAassets } from './entities';
+import { BlockSync, IPAassets } from './entities';
 import { BlockSyncRepository } from './repositories/block-sync.repository';
 import { IPAassetsRepository } from './repositories/ipasset.repository';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
-// import { TokenMarketsRepository } from './repositories/token-markets.repository';
-// import { SoulboundTokenRepository } from './repositories/soulbound-token.repository';
-import { SoulboundToken } from './entities/soulbound-token.entity';
-import { SyncStatusRepository } from './repositories/sync-status.repository';
-import { SyncTaskService } from './services/sync-task.service';
+import { SyncIPAssetService } from './services/sync-ipasset.service';
+import { LicenseTokenRepository } from './repositories/licensetoken.repository';
+import { LicenseToken } from './entities/license-token.entity';
+import { BedrockAgentModule } from './modules/bedrockAgent/bedrockAgent.module';
+
 
 const controllers = [];
-const entities = [BlockSync, SyncStatus, TokenMarkets, IPAassets];
+const entities = [BlockSync, IPAassets, LicenseToken];
 
 const repositories = [
   BlockSyncRepository,
-  SyncStatusRepository,
   IPAassetsRepository,
+  LicenseTokenRepository
 ];
 
-const services = [SyncTaskService];
+const services = [SyncIPAssetService];
 
-const processors = [SmartContractsProcessor];
+const processors = [];
 
 @Module({
   imports: [
@@ -38,23 +37,24 @@ const processors = [SmartContractsProcessor];
       }),
     }),
     BullModule.forRoot({
-      redis: {
-        host: ENV_CONFIG.REDIS.HOST,
-        port: ENV_CONFIG.REDIS.PORT,
-        username: ENV_CONFIG.REDIS.USERNAME,
-        db: parseInt(ENV_CONFIG.REDIS.DB, 10),
-      },
-      prefix: ENV_CONFIG.REDIS.PREFIX,
+      // redis: {
+      //   host: ENV_CONFIG.REDIS.HOST,
+      //   port: ENV_CONFIG.REDIS.PORT,
+      //   username: ENV_CONFIG.REDIS.USERNAME,
+      //   db: parseInt(ENV_CONFIG.REDIS.DB, 10),
+      // },
+      // prefix: ENV_CONFIG.REDIS.PREFIX,
       defaultJobOptions: {
         removeOnFail: ENV_CONFIG.KEEP_JOB_COUNT,
         removeOnComplete: { count: ENV_CONFIG.KEEP_JOB_COUNT },
       },
     }),
-    BullModule.registerQueue({
-      name: 'smart-contracts',
-    }),
+    // BullModule.registerQueue({
+    //   name: 'smart-contracts',
+    // }),
     CacheModule.register({ ttl: 10000 }),
     SharedModule,
+    BedrockAgentModule,
     TypeOrmModule.forFeature([...entities]),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],

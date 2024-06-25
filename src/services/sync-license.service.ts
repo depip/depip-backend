@@ -15,15 +15,14 @@ import { ENV_CONFIG } from '../shared/services/config.service';
 import { CommonUtil } from '../utils/common.util';
 import { InjectQueue } from '@nestjs/bull';
 import { BackoffOptions, JobOptions, Queue } from 'bull';
-import { SyncStatusRepository } from '../repositories/sync-status.repository';
 import { getLastestBlockNumber, Contract, getPastEventsByContract } from '../web3';
 import  IPAssetRegistryABI  from "../web3/ABI/IPAssetRegistry.json"
 import { AbiItem } from 'web3-utils'
 import { config } from 'process';
 
 @Injectable()
-export class SyncTaskService {
-  private readonly _logger = new Logger(SyncTaskService.name);
+export class SyncLicenseService {
+  private readonly _logger = new Logger(SyncLicenseService.name);
   private rpc;
   private api;
   private threads = 0;
@@ -35,9 +34,8 @@ export class SyncTaskService {
     private _commonUtil: CommonUtil,
     private blockSyncRepository: BlockSyncRepository,
     private ipaassetsRepository: IPAassetsRepository,
-    private statusRepository: SyncStatusRepository,
-    @InjectSchedule() private readonly schedule: Schedule,
-    @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
+    // @InjectSchedule() private readonly schedule: Schedule,
+    // @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
   ) {
     this._logger.log(
       '============== Constructor Sync Task Service ==============',
@@ -55,18 +53,16 @@ export class SyncTaskService {
   @Interval(ENV_CONFIG.TIMES_SYNC)
   async cronSync() {
     // Get the highest block and insert into SyncBlock
-    const blocks = [];
     try {
       const [lastBlock, currentBlock] = await Promise.all([
-        this.blockSyncRepository.max('lastBlock'),
+        this.blockSyncRepository.max('last_block') || 0,
         getLastestBlockNumber(),
       ]);
-      this._logger.log(`currentBlock: ` + currentBlock);
-      this._logger.log(`lastBlock.lastBlock: ` + lastBlock.lastBlock);
+
       var toBlock = Number(currentBlock)
-      var fromBlock = Number(currentBlock)  
+      var fromBlock = Number(currentBlock) - 100
       
-      fromBlock = lastBlock.lastBlock || fromBlock
+      fromBlock = lastBlock.last_block || fromBlock
       toBlock = fromBlock + 100
       
       if (toBlock > currentBlock) {
@@ -74,7 +70,7 @@ export class SyncTaskService {
       }      
 
       if (currentBlock > fromBlock) {
-        await this.processBlock(fromBlock, toBlock, "0xd43fE0d865cb5C26b1351d3eAf2E3064BE3276F6");
+        await this.processBlock(fromBlock, toBlock, ENV_CONFIG.STORY_PROTOCOL_CONTRACT.IPASSET);
         this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);        
       }
 
@@ -96,10 +92,10 @@ export class SyncTaskService {
     if(!lastBlock){
         const blockSync = new BlockSync();
         blockSync.contract = id;
-        blockSync.lastBlock = newLastBlock;
+        blockSync.last_block = newLastBlock;
         await this.blockSyncRepository.create(blockSync);
     }else{
-      lastBlock.lastBlock = newLastBlock;
+      lastBlock.last_block = newLastBlock;
       await this.blockSyncRepository.create(lastBlock);
     }
   }
@@ -118,9 +114,8 @@ export class SyncTaskService {
     this._logger.log(`toBlock: ` + toBlock);
     var newIPassets: any = await ipassetContract.getPastEvents('IPRegistered', {fromBlock:fromBlock, toBlock: toBlock})
     const ipaassets = [];
-    await Promise.all(newIPassets.map(newIPasset => new Promise(async (resolve, reject) => {
+    await Promise.all(newIPassets.map(newIPasset => new Promise(async () => {
       try {
-        console.log(newIPasset)
         const ipaasset = new IPAassets();
         ipaasset.contract_address = newIPasset.returnValues.tokenContract;
         ipaasset.token_id = newIPasset.returnValues.tokenId;
@@ -130,17 +125,15 @@ export class SyncTaskService {
         ipaasset.uri = newIPasset.returnValues.uri;
         ipaasset.registration_date = newIPasset.returnValues.registrationDate;
         ipaassets.push(ipaasset);
-        resolve(ipaassets)
       }
       catch (ex) {
           console.error(ex)
-          reject(null)
       }
     }))) 
 
     if (ipaassets.length > 0) {
       this._logger.log(`Insert data to database`);
-      await this.ipaassetsRepository.insertOnDuplicate(ipaassets, [
+      await this.ipaassetsRepository.upsert(ipaassets, [
         'id',
       ]);
     }    
