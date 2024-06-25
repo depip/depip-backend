@@ -22,6 +22,10 @@ import { AbiItem } from 'web3-utils'
 import { config } from 'process';
 import { LicenseTokenABI } from 'src/web3/ABI/LicenseToken';
 import { LicenseToken } from 'src/entities/license-token.entity';
+import { DerivativeRepository } from 'src/repositories/derivative.repository';
+import { CommonService } from './common.service';
+import { Derivative } from 'src/entities/derivative.entity';
+import { DerivativeABI } from 'src/web3/ABI/Derivative';
 
 @Injectable()
 export class SyncDerivativeService {
@@ -34,16 +38,11 @@ export class SyncDerivativeService {
   isCompleteWrite = false;
 
   constructor(
-    private _commonUtil: CommonUtil,
-    private blockSyncRepository: BlockSyncRepository,
-    private ipaassetsRepository: IPAassetsRepository,
-    @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
-    private licenseTokenRepository: LicenseTokenRepository,
-    // @InjectSchedule() private readonly schedule: Schedule,
-    // @InjectQueue('smart-contracts') private readonly contractQueue: Queue,
+    private derivativeRepository: DerivativeRepository,
+    private commonService: CommonService
   ) {
     this._logger.log(
-      '============== Constructor Sync Task Service ==============',
+      '============== Constructor Derivative Sync Task Service ==============',
     );
 
     this.rpc = ENV_CONFIG.NODE.RPC;
@@ -59,32 +58,16 @@ export class SyncDerivativeService {
   async cronSync() {
     // Get the highest block and insert into SyncBlock
     try {
-      const [lastBlock, currentBlock] = await Promise.all([
-        this.blockSyncRepository.max('last_block') || 0,
-        getLastestBlockNumber(),
-      ]);
-
-      var toBlock = Number(currentBlock)
-      var fromBlock = Number(currentBlock) - 100
-      
-      fromBlock = lastBlock.last_block || fromBlock
-      toBlock = fromBlock + 100
-      // fromBlock = 6120290;
-      // toBlock = 6120299;
-      if (toBlock > currentBlock) {
-          toBlock = Number(currentBlock)
-      }      
-
-      if (currentBlock > fromBlock) {
-        await this.processBlock(fromBlock, toBlock, ENV_CONFIG.STORY_PROTOCOL_CONTRACT.IPASSET);
-        this.updateStatus(toBlock, ENV_CONFIG.IPASSET_SYNC);       
-        await this.processBlockLicense(fromBlock, toBlock);
-        this.updateStatus(toBlock, ENV_CONFIG.TOKENLICENSE_SYNC);   
+      const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(ENV_CONFIG.TOKENLICENSE_SYNC)
+      var fBlock = fromBlock;
+      if (isExcute) {
+        await this.processBlock(fromBlock, toBlock);
+        this.commonService.updateStatus(toBlock, ENV_CONFIG.DERIVATIVE_SYNC);       
       }
 
     } catch (error) {
       this._logger.log(
-        `error when generate base blocks:${fromBlock}`,
+        `error when generate base blocks:${fBlock}`,
         error.stack,
       );
       throw error;
@@ -92,92 +75,45 @@ export class SyncDerivativeService {
   }
 
   /**
-   * Upate current height of block
-   * @param newLastBlock
-   */
-  async updateStatus(newLastBlock, id) {
-    const lastBlock = await this.blockSyncRepository.findOne({ contract: id });
-    if(!lastBlock){
-        const blockSync = new BlockSync();
-        blockSync.contract = id;
-        blockSync.last_block = newLastBlock;
-        await this.blockSyncRepository.create(blockSync);
-    }else{
-      lastBlock.last_block = newLastBlock;
-      await this.blockSyncRepository.create(lastBlock);
-    }
-  }
-
-  /**
    * Process block
    * @param newLastBlock
    */
-  async processBlock(fromBlock, toBlock, contract) {
-    const ipassetContract = Contract(
-      contract,
-      IPAssetRegistryABI as AbiItem[]
+  async processBlock(fromBlock, toBlock) {
+    const derivativeContract = Contract(
+      ENV_CONFIG.STORY_PROTOCOL_CONTRACT.DERIVATIVE,
+      DerivativeABI as AbiItem[]
     );
-    this._logger.log(`fromBlock: ` + fromBlock);
-    this._logger.log(`toBlock: ` + toBlock);
-    var newIPassets: any = await ipassetContract.getPastEvents('IPRegistered', {fromBlock:fromBlock, toBlock: toBlock})
-    const ipaassets = [];
-    await Promise.all(newIPassets.map(newIPasset => new Promise(async () => {
+    this._logger.log(`[DERIVATIVE] fromBlock: ` + fromBlock);
+    this._logger.log(`[DERIVATIVE] toBlock: ` + toBlock);
+    var newDerivatives: any = await derivativeContract.getPastEvents('DerivativeRegistered', {fromBlock:fromBlock, toBlock: toBlock})
+    const derivatives = [];
+    await Promise.all(newDerivatives.map(newDerivative => new Promise(async (resolve, reject) => {
       try {
-        const ipaasset = new IPAassets();
-        ipaasset.contract_address = newIPasset.returnValues.tokenContract;
-        ipaasset.token_id = newIPasset.returnValues.tokenId;
-        ipaasset.chain_id = newIPasset.returnValues.chainId;
-        ipaasset.ip_id = newIPasset.returnValues.ipId;
-        ipaasset.name = newIPasset.returnValues.name;
-        ipaasset.uri = newIPasset.returnValues.uri;
-        ipaasset.registration_date = newIPasset.returnValues.registrationDate;
-        ipaassets.push(ipaasset);
-      }
-      catch (ex) {
-          console.error(ex)
-      }
-    }))) 
-
-    if (ipaassets.length > 0) {
-      this._logger.log(`Insert data to database`);
-      await this.ipaassetsRepository.upsert(ipaassets, [
-        'id',
-      ]);
-    }    
-
-  }  
-  async processBlockLicense(fromBlock, toBlock) {
-    const licenseTokenContract = Contract(
-      '0x1333c78A821c9a576209B01a16dDCEF881cAb6f2',
-      LicenseTokenABI as AbiItem[]
-    );
-    this._logger.log(`[LICENSE TOKEN] fromBlock: ` + fromBlock);
-    this._logger.log(`[LICENSE TOKEN] toBlock: ` + toBlock);
-    var newLicenseTokens: any = await licenseTokenContract.getPastEvents('LicenseTokenMinted', {fromBlock:fromBlock, toBlock: toBlock})
-    const licenseTokens = [];
-    await Promise.all(newLicenseTokens.map(newLicenseToken => new Promise(async (resolve, reject) => {
-      try {
-        console.log(newLicenseToken)
-        const licenseToken = new LicenseToken();
-        licenseToken.signature = newLicenseToken.signature;
-        licenseToken.minter = newLicenseToken.returnValues.minter;
-        licenseToken.receiver = newLicenseToken.returnValues.receiver;
-        licenseToken.token_id = newLicenseToken.returnValues.tokenId;
-        licenseTokens.push(licenseToken);
-        resolve(licenseTokens)
+        // console.log(newDerivative)
+        const derivative = new Derivative();
+        derivative.caller = newDerivative?.returnValues?.caller;
+        derivative.childIpId = newDerivative?.returnValues?.childIpId;
+        derivative.licenseTokenIds = newDerivative?.returnValues?.licenseTokenIds;
+        derivative.parentIpIds = newDerivative?.returnValues?.parentIpIds;
+        derivative.licenseTermsIds = newDerivative?.returnValues?.licenseTermsIds;
+        derivative.licenseTemplate = newDerivative?.returnValues?.licenseTemplate;
+        derivative.signature = newDerivative?.signature;
+        derivatives.push(derivative);
+        resolve(derivatives)
       }
       catch (ex) {
           console.error(ex)
           reject(null)
       }
     }))) 
-  
-    if (licenseTokens.length > 0) {
-      this._logger.log(`Insert LICENSE TOKEN data to database`);
-      await this.licenseTokenRepository.insertOnDuplicate(licenseTokens, [
+
+    if (derivatives.length > 0) {
+      this._logger.log(`Insert Derivative data to database`);
+      await this.derivativeRepository.upsert(derivatives, [
         'id',
       ]);
     }    
+
+  } 
   
-  }  
 }
