@@ -43,8 +43,10 @@ export class ConfigService {
       SMART_CONTRACT_SERVICE: process.env.SMART_CONTRACT_SERVICE,
       START_HEIGHT: process.env.START_HEIGHT,
       TIMES_SYNC: Number(process.env.TIMES_SYNC) || 3000,
-      IPASSET_SYNC: Number(process.env.IPASSET_SYNC) || "IPAsset",
+      IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
       TOKENLICENSE_SYNC: Number(process.env.LICENSE_SYNC) || "TokenLicense",
+      DISPUTE_SYNC: process.env.DISPUTE_SYNC || "Dispute",
+      DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
       SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(
         process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8,
       ),
@@ -79,10 +81,12 @@ export class ConfigService {
         LICENSE: process.env.LICENSE_ADDRESS,
         ROYALTY: process.env.ROYALTY_ADDRESS,
         DISTUPE: process.env.DISTUPE_ADDRESS,
+        DERIVATIVE: process.env.DERIVATIVE_ADDRESS,
       },    
       STORY_PROTOCOL_SYNC: {
         IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
         LICENSE_SYNC: process.env.LICENSE_SYNC || "License",
+        DISPUTE_SYNC: process.env.LICENSE_SYNC || "License",
         DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
       },          
       CHAIN_INFO: {
