@@ -8,15 +8,19 @@ import { BlockSyncRepository } from './repositories/block-sync.repository';
 import { IPAassetsRepository } from './repositories/ipasset.repository';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
-import { BedrockAgentModule } from './modules/bedrockAgent/bedrockAgent.module';
 import { SyncIPAssetService } from './services/sync-ipasset.service';
+import { LicenseTokenRepository } from './repositories/licensetoken.repository';
+import { LicenseToken } from './entities/license-token.entity';
+import { BedrockAgentModule } from './modules/bedrockAgent/bedrockAgent.module';
+
 
 const controllers = [];
-const entities = [BlockSync, IPAassets];
+const entities = [BlockSync, IPAassets, LicenseToken];
 
 const repositories = [
   BlockSyncRepository,
   IPAassetsRepository,
+  LicenseTokenRepository
 ];
 
 const services = [SyncIPAssetService];
