@@ -81,8 +81,12 @@ export class SyncIPAssetService {
         ipaasset.registration_date = newIPasset.returnValues.registrationDate;
         ipaassets.push(ipaasset);
       }
-      catch (ex) {
-          console.error(ex)
+      catch (error) {
+        this._logger.log(
+          `error when generate base blocks:${fromBlock}`,
+          error.stack,
+        );
+        throw error;
       }
     }))) 
 
