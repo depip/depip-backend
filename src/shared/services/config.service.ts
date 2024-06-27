@@ -43,10 +43,8 @@ export class ConfigService {
       SMART_CONTRACT_SERVICE: process.env.SMART_CONTRACT_SERVICE,
       START_HEIGHT: process.env.START_HEIGHT,
       TIMES_SYNC: Number(process.env.TIMES_SYNC) || 3000,
-      IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
-      SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(
-        process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8,
-      ),
+      IPASSET_SYNC: process.env.IPASSET_SYNC || 'IPAsset',
+      SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8),
       KEY_BASE_URL: process.env.KEY_BASE_URL,
       PRICE_HOST_SYNC: process.env.PRICE_HOST_SYNC || 'COINGECKO',
       PRICE_TIME_SYNC: process.env.PRICE_TIME_SYNC || '0 */3 * * * *',
@@ -56,10 +54,7 @@ export class ConfigService {
         PREFIX: process.env.INDEXER_CHAIN_ID,
         DB: process.env.REDIS_DB,
         USERNAME:
-          !process.env.REDIS_USERNAME ||
-          process.env.REDIS_USERNAME === 'default'
-            ? ''
-            : process.env.REDIS_USERNAME,
+          !process.env.REDIS_USERNAME || process.env.REDIS_USERNAME === 'default' ? '' : process.env.REDIS_USERNAME,
         PASSWORD: process.env.REDIS_PASSWORD || '',
       },
       NODE: {
@@ -72,59 +67,40 @@ export class ConfigService {
         SECRET: process.env.SECRET,
         AGENTID: process.env.AGENTID,
         AGENTALIASID: process.env.AGENTALIASID,
-      },      
+      },
       STORY_PROTOCOL_CONTRACT: {
         IPASSET: process.env.IPASSET_ADDRESS,
         LICENSE: process.env.LICENSE_ADDRESS,
         ROYALTY: process.env.ROYALTY_ADDRESS,
         DISTUPE: process.env.DISTUPE_ADDRESS,
-      },    
+      },
       STORY_PROTOCOL_SYNC: {
-        IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
-        LICENSE_SYNC: process.env.LICENSE_SYNC || "License",
-        DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
-      },          
+        IPASSET_SYNC: process.env.IPASSET_SYNC || 'IPAsset',
+        LICENSE_SYNC: process.env.LICENSE_SYNC || 'License',
+        DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || 'Derivative',
+      },
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,
         COIN_MINIMAL_DENOM: process.env.COIN_MINIMAL_DENOM,
         COIN_DECIMALS: Number(process.env.COIN_DECIMALS),
         PRECISION_DIV: Math.pow(10, Number(process.env.COIN_DECIMALS)),
       },
-      INFLUX_DB: {
-        BUCKET: process.env.INFLUXDB_BUCKET,
-        ORGANIZTION: process.env.INFLUXDB_ORG,
-        URL: process.env.INFLUXDB_URL,
-        TOKEN: process.env.INFLUXDB_TOKEN,
-      },
       COINGECKO: {
         API: process.env.COINGECKO_API,
-        COIN_ID:
-          process.env.COIN_ID !== ''
-            ? process.env.COIN_ID
-            : 'aura-network,bitcoin',
+        COIN_ID: process.env.COIN_ID !== '' ? process.env.COIN_ID : 'aura-network,bitcoin',
         MAX_REQUEST: Number(process.env.MAX_REQUEST) || 250,
         COINGEKO_PLATFORM: process.env.PLATFORM || 'ethereum',
       },
       COIN_MARKET_CAP: {
         API: process.env.COIN_MARKET_CAP_API_EP,
         API_KEY: process.env.COIN_MARKET_CAP_API_KEY,
-        COIN_ID:
-          process.env.COIN_ID !== ''
-            ? process.env.COIN_ID
-            : 'aura-network,bitcoin',
+        COIN_ID: process.env.COIN_ID !== '' ? process.env.COIN_ID : 'aura-network,bitcoin',
         MAX_REQUEST: Number(process.env.MAX_REQUEST) || 250,
         COIN_MARKET_CAP_PLATFORM: process.env.PLATFORM || 'ethereum',
       },
       NODE_ENV: process.env.NODE_ENV,
       IPFS_URL: process.env.IPFS_URL || 'https://ipfs.io/',
-      SYNC_MISSING_CONTRACT_CODE:
-        process.env.SYNC_MISSING_CONTRACT_CODE === 'true' ? true : false,
-      INDEXER_V2: {
-        URL: process.env.INDEXER_V2_URL,
-        GRAPH_QL: `${process.env.INDEXER_V2_URL}v1/graphql`,
-        CHAIN_DB: process.env.INDEXER_V2_DB,
-        SECRET: process.env.INDEXER_V2_SECRET,
-      },
+      SYNC_MISSING_CONTRACT_CODE: process.env.SYNC_MISSING_CONTRACT_CODE === 'true' ? true : false,
       KEEP_JOB_COUNT: Number(process.env.KEEP_JOB_COUNT) || 10,
     };
   }
