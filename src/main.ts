@@ -26,7 +26,7 @@ async function bootstrap() {
 
   //setup swagger
   const config = new DocumentBuilder()
-    .setTitle('Aura Explorer Sync API')
+    .setTitle('Depip Backend Swagger')
     .setVersion('0.1')
     .addServer('/')
     .addServer(configService.get('SWAGGER_PATH'))
