@@ -13,7 +13,7 @@ export class LicenseTokenRepository extends BaseRepository<LicenseToken> {
   ) {
     super(repos);
     this._logger.log(
-      '============== Constructor LicenseToken Repository ==============',
+      '============== Constructor License Token Repository ==============',
     );
   }
 }
