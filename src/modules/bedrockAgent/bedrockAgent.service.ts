@@ -1,6 +1,5 @@
 import { Queue } from 'bull';
-import { SiweMessage } from 'siwe';
-
+import { IpassetService } from '../ipasset/ipasset.service';
 import { InjectQueue } from '@nestjs/bull';
 import {
   BadRequestException,
@@ -13,14 +12,16 @@ import {
   BedrockAgentRuntimeClient,
   InvokeAgentCommand,
 } from "@aws-sdk/client-bedrock-agent-runtime";
+import { parse } from 'path';
 
 
 
 @Injectable()
 export class BedrockAgentService {
-  private readonly logger = new Logger(BedrockAgentService.name);
+  private readonly _logger = new Logger(BedrockAgentService.name);
+  
   constructor(
-    // private checkConditionService: CheckConditionService,
+    private ipassetService: IpassetService,
     // private redisClientService: RedisService,
 
   ) {}
@@ -72,7 +73,7 @@ export class BedrockAgentService {
     try {
       let completion = "";
       const response = await client.send(command);
-
+      
       if (response.completion === undefined) {
         throw new Error("Completion is undefined");
       }
@@ -83,12 +84,30 @@ export class BedrockAgentService {
         completion += decodedResponse;
       }
 
+      const re = /<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/g
+      const actions = completion.match(re)
+      this._logger.log(`[actions]: ` + actions);
+
+      if(actions){
+        const actionsObj = JSON.parse(actions.toString().replace(/<script>|<\/script>/g, ''))
+        if(actionsObj.type == "CREATE_IP_ASSET"){
+          completion = await this.registerIpasset(actionsObj.nftContract, actionsObj.tokenId)
+        }
+      }
       return { sessionId: sessionId, completion };
     } catch (err) {
       console.error(err);
     }
   };
 
+  async registerIpasset (nftAddr, tokenId) {
+    try {
+      const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
+      return res;
+    } catch (error) {
+      return "Register fail: " + error
+    }
+  };
 }
 
 

@@ -10,16 +10,32 @@ import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 import { BedrockAgentModule } from './modules/bedrockAgent/bedrockAgent.module';
 import { SyncIPAssetService } from './services/sync-ipasset.service';
+import { LicenseTokenRepository } from './repositories/licensetoken.repository';
+import { LicenseToken } from './entities/license-token.entity';
+import { SyncLicenseService } from './services/sync-license.service';
+import { SyncDisputeService } from './services/sync-dispute.service';
+import { DisputeRaiseRepository } from './repositories/dispute-raise.repository';
+import { DisputeRaise } from './entities/dispute-raise.entity';
+import { DisputeCancelled } from './entities/dispute-cancelled.entity';
+import { DisputeCancelledRepository } from './repositories/dispute-cancelled.repository';
+import { CommonService } from './services/common.service';
+import { DerivativeRepository } from './repositories/derivative.repository';
+import { SyncDerivativeService } from './services/sync-derivative.service';
+import { Derivative } from './entities/derivative.entity';
 
 const controllers = [];
-const entities = [BlockSync, IPAassets];
+const entities = [BlockSync, IPAassets, LicenseToken,DisputeRaise, DisputeCancelled, Derivative];
 
 const repositories = [
   BlockSyncRepository,
   IPAassetsRepository,
+  LicenseTokenRepository,
+  DisputeRaiseRepository,
+  DisputeCancelledRepository,
+  DerivativeRepository
 ];
 
-const services = [SyncIPAssetService];
+const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService,SyncDerivativeService];
 
 const processors = [];
 

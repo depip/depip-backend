@@ -37,14 +37,20 @@ export class ConfigService {
 
   get ENV_CONFIG() {
     return {
+      MASTERWALLET: process.env.MASTERWALLET,
       APP_PORT: process.env.PORT,
       WEBSOCKET_URL: process.env.WEBSOCKET_URL,
       THREADS: Number(process.env.THREADS),
       SMART_CONTRACT_SERVICE: process.env.SMART_CONTRACT_SERVICE,
       START_HEIGHT: process.env.START_HEIGHT,
       TIMES_SYNC: Number(process.env.TIMES_SYNC) || 3000,
-      IPASSET_SYNC: process.env.IPASSET_SYNC || 'IPAsset',
-      SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8),
+      IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
+      TOKENLICENSE_SYNC: Number(process.env.LICENSE_SYNC) || "TokenLicense",
+      DISPUTE_SYNC: process.env.DISPUTE_SYNC || "Dispute",
+      DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
+      SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(
+        process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8,
+      ),
       KEY_BASE_URL: process.env.KEY_BASE_URL,
       PRICE_HOST_SYNC: process.env.PRICE_HOST_SYNC || 'COINGECKO',
       PRICE_TIME_SYNC: process.env.PRICE_TIME_SYNC || '0 */3 * * * *',
@@ -60,6 +66,7 @@ export class ConfigService {
       NODE: {
         API: process.env.API,
         RPC: process.env.RPC,
+        CHAINID: process.env.CHAINID,
       },
       BEDROCK: {
         REGION: process.env.REGION,
@@ -67,18 +74,20 @@ export class ConfigService {
         SECRET: process.env.SECRET,
         AGENTID: process.env.AGENTID,
         AGENTALIASID: process.env.AGENTALIASID,
-      },
+      },      
       STORY_PROTOCOL_CONTRACT: {
         IPASSET: process.env.IPASSET_ADDRESS,
         LICENSE: process.env.LICENSE_ADDRESS,
         ROYALTY: process.env.ROYALTY_ADDRESS,
         DISTUPE: process.env.DISTUPE_ADDRESS,
-      },
+        DERIVATIVE: process.env.DERIVATIVE_ADDRESS,
+      },    
       STORY_PROTOCOL_SYNC: {
-        IPASSET_SYNC: process.env.IPASSET_SYNC || 'IPAsset',
-        LICENSE_SYNC: process.env.LICENSE_SYNC || 'License',
-        DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || 'Derivative',
-      },
+        IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
+        LICENSE_SYNC: process.env.LICENSE_SYNC || "License",
+        DISPUTE_SYNC: process.env.LICENSE_SYNC || "License",
+        DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
+      },   
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,
         COIN_MINIMAL_DENOM: process.env.COIN_MINIMAL_DENOM,
