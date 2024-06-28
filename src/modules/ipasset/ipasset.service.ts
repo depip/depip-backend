@@ -39,14 +39,14 @@ export class IpassetService {
     //   this._logger.error(errMsg);
     //   throw new Error(errMsg);
     // }
-    const isRegistered = await this._isRegistered(nftAddr, tokenId, "11155111")
+    const isRegistered = await this._isRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
     if (isRegistered) {
       return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
     }
     
     this._logger.log(`perform to call contract! `);
     const tx = await this.contractWithMasterWallet.register(
-      "11155111",
+      ENV_CONFIG.NODE.CHAINID,
       nftAddr,
       tokenId
     );
@@ -91,7 +91,7 @@ export class IpassetService {
       }
     }
     const ipId = await this.contractWithMasterWallet.ipId(
-      chainId,
+      ENV_CONFIG.NODE.CHAINID,
       nftAddr,
       tokenId
     );

@@ -91,7 +91,7 @@ export class BedrockAgentService {
       if(actions){
         const actionsObj = JSON.parse(actions.toString().replace(/<script>|<\/script>/g, ''))
         if(actionsObj.type == "CREATE_IP_ASSET"){
-          completion = await this.registerIpasset(actionsObj.nftContract, actionsObj.tokenId, 11155111)
+          completion = await this.registerIpasset(actionsObj.nftContract, actionsObj.tokenId)
         }
       }
       return { sessionId: sessionId, completion };
@@ -100,7 +100,7 @@ export class BedrockAgentService {
     }
   };
 
-  async registerIpasset (nftAddr, tokenId, chainId) {
+  async registerIpasset (nftAddr, tokenId) {
     try {
       const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
       return res;

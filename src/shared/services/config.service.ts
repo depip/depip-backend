@@ -69,6 +69,7 @@ export class ConfigService {
       NODE: {
         API: process.env.API,
         RPC: process.env.RPC,
+        CHAINID: process.env.CHAINID,
       },
       BEDROCK: {
         REGION: process.env.REGION,
