@@ -55,7 +55,7 @@
     "siwe": "^2.3.2",
     "swagger-ui-express": "^4.3.0",
     "tendermint": "^5.0.2",
-    "typeorm": "^0.2.41",
+    "typeorm": "^0.3.0",
     "viem": "^2.13.10",
     "web3": "^4.9.0"
   },
