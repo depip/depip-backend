@@ -25,14 +25,14 @@ async function bootstrap() {
   const configService = app.select(SharedModule).get(ConfigService);
 
   //setup swagger
-  // const config = new DocumentBuilder()
-  //   .setTitle('Aura Explorer Sync API')
-  //   .setVersion('0.1')
-  //   .addServer('/')
-  //   .addServer(configService.get('SWAGGER_PATH'))
-  //   .build();
-  // const document = SwaggerModule.createDocument(app, config);
-  // SwaggerModule.setup('documentation', app, document);
+  const config = new DocumentBuilder()
+    .setTitle('Depip Backend Swagger')
+    .setVersion('0.1')
+    .addServer('/')
+    .addServer(configService.get('SWAGGER_PATH'))
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('documentation', app, document);
 
   await app.listen(configService.ENV_CONFIG.APP_PORT);
 }
