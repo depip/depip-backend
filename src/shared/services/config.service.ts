@@ -37,6 +37,7 @@ export class ConfigService {
 
   get ENV_CONFIG() {
     return {
+      MASTERWALLET: process.env.MASTERWALLET,
       APP_PORT: process.env.PORT,
       WEBSOCKET_URL: process.env.WEBSOCKET_URL,
       THREADS: Number(process.env.THREADS),

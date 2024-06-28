@@ -5,4 +5,4 @@ import { IpassetService } from './ipasset.service';
   providers: [IpassetService],
   exports: [IpassetService],
 })
-export class LevelingModule {}
+export class IpassetModule {}
