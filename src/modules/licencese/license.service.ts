@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { findLast } from 'lodash';
 import { ENV_CONFIG } from '../../shared/services/config.service';
+import { IpassetService } from '../ipasset/ipasset.service';
 import {
   Contract,
   JsonRpcProvider,
@@ -12,8 +13,8 @@ import * as fs from 'fs';
 import path from 'path';
 
 @Injectable()
-export class LicenceseService {
-  private readonly _logger = new Logger(LicenceseService.name);
+export class LicenseService {
+  private readonly _logger = new Logger(LicenseService.name);
   private PROVIDER_URL = ENV_CONFIG.NODE.RPC;
   // Connecting to provider
   private PROVIDER = new JsonRpcProvider(this.PROVIDER_URL);
@@ -21,6 +22,11 @@ export class LicenceseService {
   private CONTRACT_ABI = [];
   private contractWithMasterWallet = null;
   private masterWallet = null;
+
+  constructor(
+    private ipassetService: IpassetService,
+
+  ) {}  
 
   async mintLicenses(nftAddr: string, tokenId: number) {
     this._logger.log(`perform registration ipasset! `);
@@ -34,16 +40,43 @@ export class LicenceseService {
         throw new Error(errMsg);
       }
     }
-    // if (!this.masterWallet) {
-    //   const errMsg = `can not get contract With Master Wallet`;
-    //   this._logger.error(errMsg);
-    //   throw new Error(errMsg);
-    // }
-    const isRegistered = await this._isRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
-    if (isRegistered) {
-      return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
+
+    // Check registed Ipasset
+    let ipId = null
+    ipId = await this._isRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
+    if (!ipId) {
+      const tx = await this.ipassetService.registerIpasset(nftAddr, tokenId)
+
+      ipId = await this.contractWithMasterWallet.ipId(
+        ENV_CONFIG.NODE.CHAINID,
+        nftAddr,
+        tokenId
+      );      
     }
+
+    // Check PIL Terms
+    // ToDo
+    // const licenseTerms = getLicenseTermByType(PIL_TYPE.COMMERCIAL_USE, {
+    //   mintingFee: request.mintingFee,
+    //   currency: request.currency,
+    //   royaltyPolicyLAPAddress: this.royaltyPolicyLAPClient.address,
+    // });
+
+    // const licenseTermsId = await this.getLicenseTermsId(licenseTerms);
+    // if (licenseTermsId !== 0n) {
+    //   return { licenseTermsId: licenseTermsId };
+    // }
     
+    // const txHash = await this.licenseTemplateClient.registerLicenseTerms({ terms: licenseTerms });
+    // if (request.txOptions?.waitForTransaction) {
+    //   const txReceipt = await this.rpcClient.waitForTransactionReceipt({ hash: txHash });
+    //   const targetLogs = this.licenseTemplateClient.parseTxLicenseTermsRegisteredEvent(txReceipt);
+    //   return { txHash: txHash, licenseTermsId: targetLogs[0].licenseTermsId };
+    // } else {
+    //   return { txHash: txHash };
+    // }
+
+    // Mint License  
     this._logger.log(`perform to call contract! `);
     const tx = await this.contractWithMasterWallet.register(
       ENV_CONFIG.NODE.CHAINID,
@@ -142,7 +175,7 @@ export class LicenceseService {
     if(isRegistered){
       return ipId;
     }else{
-      return false;
+      return null;
     }
     
   }  
