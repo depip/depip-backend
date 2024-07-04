@@ -72,7 +72,6 @@ export class SyncLicenseService {
     const licenseTokens = [];
     await Promise.all(newLicenseTokens.map(newLicenseToken => new Promise(async (resolve, reject) => {
       try {
-        console.log(newLicenseToken)
         const licenseToken = new LicenseToken();
         licenseToken.signature = newLicenseToken.signature;
         licenseToken.minter = newLicenseToken.returnValues.minter;
@@ -89,7 +88,7 @@ export class SyncLicenseService {
 
     if (licenseTokens.length > 0) {
       this._logger.log(`Insert LICENSE TOKEN data to database`);
-      await this.licenseTokenRepository.insertOnDuplicate(licenseTokens, [
+      await this.licenseTokenRepository.upsert(licenseTokens, [
         'id',
       ]);
     }
