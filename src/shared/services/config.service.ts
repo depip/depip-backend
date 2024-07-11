@@ -81,6 +81,7 @@ export class ConfigService {
         ROYALTY: process.env.ROYALTY_ADDRESS,
         DISTUPE: process.env.DISTUPE_ADDRESS,
         DERIVATIVE: process.env.DERIVATIVE_ADDRESS,
+        ROYALTY_POLICYLAP: process.env.ROYALTYPOLICYLAP_ADDRESS,
       },    
       STORY_PROTOCOL_SYNC: {
         IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",

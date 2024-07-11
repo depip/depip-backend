@@ -2,6 +2,7 @@
 import { PIL_TYPE, LicenseTerms } from "../shared/types/license-type";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000"
+
 export function getLicenseTermByType(
   type: PIL_TYPE,
   term?: {
@@ -36,12 +37,12 @@ export function getLicenseTermByType(
     if (!term || term.mintingFee === undefined || term.currency === undefined) {
       throw new Error("mintingFee currency are required for commercial use PIL.");
     }
-    licenseTerms.royaltyPolicy = zeroAddress//getAddress(term.royaltyPolicyLAPAddress);
+    licenseTerms.royaltyPolicy = term.royaltyPolicyLAPAddress;
     licenseTerms.mintingFee = BigInt(term.mintingFee);
     licenseTerms.commercialUse = true;
     licenseTerms.commercialAttribution = true;
     licenseTerms.derivativesReciprocal = false;
-    licenseTerms.currency = zeroAddress//getAddress(term.currency);
+    licenseTerms.currency = term.currency;
     return licenseTerms;
   } else {
     if (
@@ -57,14 +58,14 @@ export function getLicenseTermByType(
     if (term.commercialRevShare < 0 || term.commercialRevShare > 100) {
       throw new Error("commercialRevShare should be between 0 and 100.");
     }
-    licenseTerms.royaltyPolicy = zeroAddress//getAddress(term.royaltyPolicyLAPAddress);
+    licenseTerms.royaltyPolicy = term.royaltyPolicyLAPAddress;
     licenseTerms.mintingFee = BigInt(term.mintingFee);
     licenseTerms.commercialUse = true;
     licenseTerms.commercialAttribution = true;
 
     licenseTerms.commercialRevShare = (term.commercialRevShare / 100) * 100000000;
     licenseTerms.derivativesReciprocal = true;
-    licenseTerms.currency = zeroAddress//getAddress(term.currency);
+    licenseTerms.currency = term.currency;
     return licenseTerms;
   }
 }

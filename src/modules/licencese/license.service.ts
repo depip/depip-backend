@@ -2,6 +2,8 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { findLast } from 'lodash';
 import { ENV_CONFIG } from '../../shared/services/config.service';
 import { IpassetService } from '../ipasset/ipasset.service';
+import { getLicenseTermByType } from '../../utils/getLicenseTermsByType';
+import { PIL_TYPE } from '../../shared/types/license-type';
 import {
   Contract,
   JsonRpcProvider,
@@ -55,26 +57,11 @@ export class LicenseService {
     }
 
     // Check PIL Terms
-    // ToDo
-    // const licenseTerms = getLicenseTermByType(PIL_TYPE.COMMERCIAL_USE, {
-    //   mintingFee: request.mintingFee,
-    //   currency: request.currency,
-    //   royaltyPolicyLAPAddress: this.royaltyPolicyLAPClient.address,
-    // });
+    const licenseTermsId = await this._registerPILTerms("10", "0x0000000000000000000000000000000000000000", PIL_TYPE.COMMERCIAL_USE);
+    // Register PIL terms
 
-    // const licenseTermsId = await this.getLicenseTermsId(licenseTerms);
-    // if (licenseTermsId !== 0n) {
-    //   return { licenseTermsId: licenseTermsId };
-    // }
-    
-    // const txHash = await this.licenseTemplateClient.registerLicenseTerms({ terms: licenseTerms });
-    // if (request.txOptions?.waitForTransaction) {
-    //   const txReceipt = await this.rpcClient.waitForTransactionReceipt({ hash: txHash });
-    //   const targetLogs = this.licenseTemplateClient.parseTxLicenseTermsRegisteredEvent(txReceipt);
-    //   return { txHash: txHash, licenseTermsId: targetLogs[0].licenseTermsId };
-    // } else {
-    //   return { txHash: txHash };
-    // }
+    // Attack PIL terms
+
 
     // Mint License  
     this._logger.log(`perform to call contract! `);
@@ -114,46 +101,91 @@ export class LicenseService {
   }
 
   async _attackPILTerms() {
-    this.masterWallet = new Wallet(ENV_CONFIG.MASTERWALLET, new JsonRpcProvider(this.PROVIDER_URL));
-    if (!this.masterWallet) return null;
+    // const isExisted = await this.piLicenseTemplateReadOnlyClient.exists({
+    //   licenseTermsId: request.licenseTermsId,
+    // });
 
-    if (this.CONTRACT_ABI.length == 0) {
-      const abiFilePath = path.resolve(__dirname, '../../web3/ABI/IPAssetRegistry.json');
-      const files = fs.readFileSync(abiFilePath);
-      this.CONTRACT_ABI = JSON.parse(files.toString());
-    }
-
-    // Connecting to smart contract
-    const contract = new Contract(
-      this.ipassetContractAddr,
-      this.CONTRACT_ABI,
-      this.PROVIDER
-    );
-
-    const rs = contract.connect(this.masterWallet);
-    return rs;
+    // const isExisted = await this.piLicenseTemplateReadOnlyClient.exists({
+    //   licenseTermsId: request.licenseTermsId,
+    // });
+    // if (!isExisted) {
+    //   throw new Error(`License terms id ${request.licenseTermsId} do not exist.`);
+    // }
+    // const isAttachedLicenseTerms =
+    //   await this.licenseRegistryReadOnlyClient.hasIpAttachedLicenseTerms({
+    //     ipId: request.ipId,
+    //     licenseTemplate:
+    //       (request.licenseTemplate &&
+    //         getAddress(request.licenseTemplate, "request.licenseTemplate")) ||
+    //       this.licenseTemplateClient.address,
+    //     licenseTermsId: request.licenseTermsId,
+    //   });
+    // if (isAttachedLicenseTerms) {
+    //   return { txHash: "", success: false };
+    // }
+    // const txHash = await this.licensingModuleClient.attachLicenseTerms({
+    //   ipId: request.ipId,
+    //   licenseTemplate: request.licenseTemplate || this.licenseTemplateClient.address,
+    //   licenseTermsId: request.licenseTermsId,
+    // });
+    // if (request.txOptions?.waitForTransaction) {
+    //   await this.rpcClient.waitForTransactionReceipt({ hash: txHash });
+    //   return { txHash: txHash, success: true };
+    // } else {
+    //   return { txHash: txHash };
+    // }
+    return null;
   }    
 
-  async _registerPILTerms() {
-    this.masterWallet = new Wallet(ENV_CONFIG.MASTERWALLET, new JsonRpcProvider(this.PROVIDER_URL));
-    if (!this.masterWallet) return null;
+  async _registerPILTerms(mintingFee, currency, pilType) {
 
-    if (this.CONTRACT_ABI.length == 0) {
-      const abiFilePath = path.resolve(__dirname, '../../web3/ABI/IPAssetRegistry.json');
-      const files = fs.readFileSync(abiFilePath);
-      this.CONTRACT_ABI = JSON.parse(files.toString());
-    }
+    const licenseTerms = getLicenseTermByType(PIL_TYPE.COMMERCIAL_USE, {
+      mintingFee: mintingFee,
+      currency: currency,
+      royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
+    });
 
-    // Connecting to smart contract
-    const contract = new Contract(
-      this.ipassetContractAddr,
-      this.CONTRACT_ABI,
-      this.PROVIDER
-    );
+    // PIL Term Existed
+    // const licenseTermsId = await this.getLicenseTermsId(licenseTerms);
+    // if (licenseTermsId !== 0n) {
+    //   return { licenseTermsId: licenseTermsId };
+    // }
 
-    const rs = contract.connect(this.masterWallet);
-    return rs;
+    // Register PIL terms
+    // const txHash = await this.licenseTemplateClient.registerLicenseTerms({ terms: licenseTerms });
+    // if (request.txOptions?.waitForTransaction) {
+    //   const txReceipt = await this.rpcClient.waitForTransactionReceipt({ hash: txHash });
+    //   const targetLogs = this.licenseTemplateClient.parseTxLicenseTermsRegisteredEvent(txReceipt);
+    //   return { txHash: txHash, licenseTermsId: targetLogs[0].licenseTermsId };
+    // } else {
+    //   return { txHash: txHash };
+    // }
   }   
+
+  /**
+   * parse tx receipt event LicenseTermsRegistered for contract PILicenseTemplate
+   */
+  // public parseTxLicenseTermsRegisteredEvent(
+  //   txReceipt: TransactionReceipt,
+  // ): Array<PiLicenseTemplateLicenseTermsRegisteredEvent> {
+  //   const targetLogs: Array<PiLicenseTemplateLicenseTermsRegisteredEvent> = [];
+  //   for (const log of txReceipt.logs) {
+  //     try {
+  //       const event = decodeEventLog({
+  //         abi: piLicenseTemplateAbi,
+  //         eventName: "LicenseTermsRegistered",
+  //         data: log.data,
+  //         topics: log.topics,
+  //       });
+  //       if (event.eventName === "LicenseTermsRegistered") {
+  //         targetLogs.push(event.args);
+  //       }
+  //     } catch (e) {
+  //       /* empty */
+  //     }
+  //   }
+  //   return targetLogs;
+  // }
 
   async _isRegistered(nftAddr: string, tokenId: number, chainId: string) {
     // Connecting to smart contract

@@ -84,16 +84,18 @@ export class BedrockAgentService {
         completion += decodedResponse;
       }
 
-      const re = /<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/g
-      const actions = completion.match(re)
-      this._logger.log(`[actions]: ` + actions);
+      // const re = /<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/g
+      // const actions = completion.match(re)
+      // this._logger.log(`[actions]: ` + actions);
 
-      if(actions){
-        const actionsObj = JSON.parse(actions.toString().replace(/<script>|<\/script>/g, ''))
-        if(actionsObj.type == "CREATE_IP_ASSET"){
-          completion = await this.registerIpasset(actionsObj.nftContract, actionsObj.tokenId)
-        }
-      }
+      // if(actions){
+      //   const actionsObj = JSON.parse(actions.toString().replace(/<script>|<\/script>/g, ''))
+      //   if(actionsObj.type == "CREATE_IP_ASSET"){
+      //     completion = await this.registerIpasset(actionsObj.nftContract, actionsObj.tokenId)
+      //   }else if(actionsObj.type == "MINT_LICENSE"){
+      //     completion = await this.mintLicenseToken(actionsObj.nftContract, actionsObj.tokenId)
+      //   }
+      // }
       return { sessionId: sessionId, completion };
     } catch (err) {
       console.error(err);
@@ -108,6 +110,15 @@ export class BedrockAgentService {
       return "Register fail: " + error
     }
   };
+
+  async mintLicenseToken (nftAddr, tokenId) {
+    try {
+      const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
+      return res;
+    } catch (error) {
+      return "Register fail: " + error
+    }
+  };  
 }
 
 
