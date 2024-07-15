@@ -7,6 +7,7 @@ import {
   Wallet,
   formatEther,
   parseEther,
+  Interface
 } from 'ethers';
 import * as fs from 'fs';
 import path from 'path';
@@ -22,7 +23,7 @@ export class IpassetService {
   private contractWithMasterWallet = null;
   private masterWallet = null;
 
-  async registerIpasset(nftAddr: string, tokenId: number) {
+  async registerIpasset(nftAddr: string, tokenId: string) {
     this._logger.log(`perform registration ipasset! `);
 
     // Connecting to smart contract
@@ -55,7 +56,13 @@ export class IpassetService {
       alert('error message');
       return "Register fail: " + res.hash
     }else{
-      return "Register successed, TX: " + res.hash
+      const ipId = await this.contractWithMasterWallet.ipId(
+        ENV_CONFIG.NODE.CHAINID,
+        nftAddr,
+        tokenId
+      );      
+
+      return "Register successed, TX: " + res.hash + " IPID: " + ipId
     }
   }
 
@@ -80,7 +87,7 @@ export class IpassetService {
     return rs;
   }  
 
-  async _isRegistered(nftAddr: string, tokenId: number, chainId: string) {
+  async _isRegistered(nftAddr: string, tokenId: string, chainId: string) {
     // Connecting to smart contract
     if (!this.contractWithMasterWallet) {
       this.contractWithMasterWallet = await this._getContract();

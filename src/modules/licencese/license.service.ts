@@ -30,7 +30,7 @@ export class LicenseService {
 
   ) {}  
 
-  async mintLicenses(nftAddr: string, tokenId: number) {
+  async mintLicenses(nftAddr: string, tokenId: string) {
     this._logger.log(`perform registration ipasset! `);
 
     // Connecting to smart contract
@@ -187,7 +187,7 @@ export class LicenseService {
   //   return targetLogs;
   // }
 
-  async _isRegistered(nftAddr: string, tokenId: number, chainId: string) {
+  async _isRegistered(nftAddr: string, tokenId: string, chainId: string) {
     // Connecting to smart contract
     if (!this.contractWithMasterWallet) {
       this.contractWithMasterWallet = await this._getContract();

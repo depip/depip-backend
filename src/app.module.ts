@@ -22,6 +22,7 @@ import { CommonService } from './services/common.service';
 import { DerivativeRepository } from './repositories/derivative.repository';
 import { SyncDerivativeService } from './services/sync-derivative.service';
 import { Derivative } from './entities/derivative.entity';
+import { IpassetModule } from './modules/ipasset/ipasset.module';
 
 const controllers = [];
 const entities = [BlockSync, IPAassets, LicenseToken,DisputeRaise, DisputeCancelled, Derivative];
@@ -67,6 +68,7 @@ const processors = [];
     CacheModule.register({ ttl: 10000 }),
     SharedModule,
     BedrockAgentModule,
+    IpassetModule,
     TypeOrmModule.forFeature([...entities]),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
