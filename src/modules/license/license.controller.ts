@@ -13,18 +13,18 @@ import {
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { IpassetService } from './ipasset.service';
-import { IpassetInput } from './dto/ipasset-input.dto';
+import { LicenseService } from './license.service';
+import { LicenseInput } from './dto/license-input.dto';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
-@Controller('ipasset')
-@ApiTags('ipasset')
-export class IpassetController {
-  constructor(private readonly ipassetSvc: IpassetService) { }
+@Controller('license')
+@ApiTags('license')
+export class LicenseController {
+  constructor(private readonly licenseSvc: LicenseService) { }
 
-  @Post("register")
+  @Post("mintLicense")
   // @UseInterceptors(CacheInterceptor)
-  ipassetRegister(@Body() data: IpassetInput) {
-    return this.ipassetSvc.registerIpasset(data.nftAddress, data.tokenId);
+  mintLicense(@Body() data: LicenseInput) {
+    return this.licenseSvc.mintLicenses(data.nftAddress, data.tokenId);
   }
 }

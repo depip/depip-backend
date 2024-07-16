@@ -25,45 +25,48 @@ export class IpassetService {
 
   async registerIpasset(nftAddr: string, tokenId: string) {
     this._logger.log(`perform registration ipasset! `);
-
-    // Connecting to smart contract
-    if (!this.contractWithMasterWallet) {
-      this.contractWithMasterWallet = await this._getContract();
+    try {
+      // Connecting to smart contract
       if (!this.contractWithMasterWallet) {
-        const errMsg = `can not get contract With Master Wallet`;
-        this._logger.error(errMsg);
-        throw new Error(errMsg);
+        this.contractWithMasterWallet = await this._getContract();
+        if (!this.contractWithMasterWallet) {
+          const errMsg = `can not get contract With Master Wallet`;
+          this._logger.error(errMsg);
+          throw new Error(errMsg);
+        }
       }
-    }
-    // if (!this.masterWallet) {
-    //   const errMsg = `can not get contract With Master Wallet`;
-    //   this._logger.error(errMsg);
-    //   throw new Error(errMsg);
-    // }
-    const isRegistered = await this._isRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
-    if (isRegistered) {
-      return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
-    }
-    
-    this._logger.log(`perform to call contract! `);
-    const tx = await this.contractWithMasterWallet.register(
-      ENV_CONFIG.NODE.CHAINID,
-      nftAddr,
-      tokenId
-    );
-    const res = await tx.wait();
-    if (res.status !== 1) {
-      alert('error message');
-      return "Register fail: " + res.hash
-    }else{
-      const ipId = await this.contractWithMasterWallet.ipId(
+
+      const isRegistered = await this._isRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
+      if (isRegistered) {
+        return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
+      }
+      
+      this._logger.log(`perform to call contract! `);
+      const tx = await this.contractWithMasterWallet.register(
         ENV_CONFIG.NODE.CHAINID,
         nftAddr,
         tokenId
-      );      
+      );
+      const res = await tx.wait();
+      if (res.status !== 1) {
+        alert('error message');
+        return "Register fail: " + res.hash
+      }else{
+        const ipId = await this.contractWithMasterWallet.ipId(
+          ENV_CONFIG.NODE.CHAINID,
+          nftAddr,
+          tokenId
+        );      
 
-      return "Register successed, TX: " + res.hash + " IPID: " + ipId
-    }
+        return "Register successed, TX: " + res.hash + " IPID: " + ipId
+      }
+    } catch (error) {
+      this._logger.log(
+        `error when register ipasset :${nftAddr}`,
+        error.stack,
+      );
+      throw error;
+    }       
   }
 
   async _getContract() {
@@ -88,27 +91,34 @@ export class IpassetService {
   }  
 
   async _isRegistered(nftAddr: string, tokenId: string, chainId: string) {
-    // Connecting to smart contract
-    if (!this.contractWithMasterWallet) {
-      this.contractWithMasterWallet = await this._getContract();
+    try {
+      // Connecting to smart contract
       if (!this.contractWithMasterWallet) {
-        const errMsg = `can not get contract With Master Wallet`;
-        this._logger.error(errMsg);
-        throw new Error(errMsg);
+        this.contractWithMasterWallet = await this._getContract();
+        if (!this.contractWithMasterWallet) {
+          const errMsg = `can not get contract With Master Wallet`;
+          this._logger.error(errMsg);
+          throw new Error(errMsg);
+        }
       }
-    }
-    const ipId = await this.contractWithMasterWallet.ipId(
-      ENV_CONFIG.NODE.CHAINID,
-      nftAddr,
-      tokenId
-    );
-    this._logger.log(`ipId ` + ipId);
-    const isRegistered = await this.contractWithMasterWallet.isRegistered(ipId);
-    if(isRegistered){
-      return ipId;
-    }else{
-      return false;
-    }
-    
+      const ipId = await this.contractWithMasterWallet.ipId(
+        ENV_CONFIG.NODE.CHAINID,
+        nftAddr,
+        tokenId
+      );
+      this._logger.log(`ipId ` + ipId);
+      const isRegistered = await this.contractWithMasterWallet.isRegistered(ipId);
+      if(isRegistered){
+        return ipId;
+      }else{
+        return false;
+      }
+    } catch (error) {
+      this._logger.log(
+        `error when call contract :${this.ipassetContractAddr}`,
+        error.stack,
+      );
+      throw error;
+    }    
   }  
 }

@@ -21,8 +21,17 @@ export class LicenseService {
   // Connecting to provider
   private PROVIDER = new JsonRpcProvider(this.PROVIDER_URL);
   private ipassetContractAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.IPASSET;
-  private CONTRACT_ABI = [];
-  private contractWithMasterWallet = null;
+  private licenseContractAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE;
+  private licenseRegistryContractAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE;
+  private PILicenseTemplateAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE;
+  private ipassetAbi = [];
+  private licenseAbi = [];
+  private licenseRegistryAbi = [];
+  private PILicenseTemplateAbi = [];
+  private ipassetContract = null;
+  private PILicenseTemplateContract = null;
+  private licenseContract = null;
+  private licenseRegistryContract = null;
   private masterWallet = null;
 
   constructor(
@@ -34,9 +43,14 @@ export class LicenseService {
     this._logger.log(`perform registration ipasset! `);
 
     // Connecting to smart contract
-    if (!this.contractWithMasterWallet) {
-      this.contractWithMasterWallet = await this._getContract();
-      if (!this.contractWithMasterWallet) {
+    if (!this.ipassetContract) {
+      if (this.ipassetAbi.length == 0) {
+        const abiFilePath = path.resolve(__dirname, '../../web3/ABI/IPAssetRegistry.json');
+        const files = fs.readFileSync(abiFilePath);
+        this.ipassetAbi = JSON.parse(files.toString());
+      }
+      this.ipassetContract = await this._getContract(this.ipassetContractAddr, this.ipassetAbi);
+      if (!this.ipassetContract) {
         const errMsg = `can not get contract With Master Wallet`;
         this._logger.error(errMsg);
         throw new Error(errMsg);
@@ -49,7 +63,7 @@ export class LicenseService {
     if (!ipId) {
       const tx = await this.ipassetService.registerIpasset(nftAddr, tokenId)
 
-      ipId = await this.contractWithMasterWallet.ipId(
+      ipId = await this.ipassetContract.ipId(
         ENV_CONFIG.NODE.CHAINID,
         nftAddr,
         tokenId
@@ -65,7 +79,7 @@ export class LicenseService {
 
     // Mint License  
     this._logger.log(`perform to call contract! `);
-    const tx = await this.contractWithMasterWallet.register(
+    const tx = await this.ipassetContract.register(
       ENV_CONFIG.NODE.CHAINID,
       nftAddr,
       tokenId
@@ -79,20 +93,13 @@ export class LicenseService {
     }
   }
 
-  async _getContract() {
+  async _getContract(contractAddr, contractAbi) {
     this.masterWallet = new Wallet(ENV_CONFIG.MASTERWALLET, new JsonRpcProvider(this.PROVIDER_URL));
-    if (!this.masterWallet) return null;
-
-    if (this.CONTRACT_ABI.length == 0) {
-      const abiFilePath = path.resolve(__dirname, '../../web3/ABI/IPAssetRegistry.json');
-      const files = fs.readFileSync(abiFilePath);
-      this.CONTRACT_ABI = JSON.parse(files.toString());
-    }
 
     // Connecting to smart contract
     const contract = new Contract(
-      this.ipassetContractAddr,
-      this.CONTRACT_ABI,
+      contractAddr,
+      contractAbi,
       this.PROVIDER
     );
 
@@ -101,18 +108,9 @@ export class LicenseService {
   }
 
   async _attackPILTerms() {
-    // const isExisted = await this.piLicenseTemplateReadOnlyClient.exists({
-    //   licenseTermsId: request.licenseTermsId,
-    // });
 
-    // const isExisted = await this.piLicenseTemplateReadOnlyClient.exists({
-    //   licenseTermsId: request.licenseTermsId,
-    // });
-    // if (!isExisted) {
-    //   throw new Error(`License terms id ${request.licenseTermsId} do not exist.`);
-    // }
     // const isAttachedLicenseTerms =
-    //   await this.licenseRegistryReadOnlyClient.hasIpAttachedLicenseTerms({
+    //   await this.contractWithMasterWallet.hasIpAttachedLicenseTerms({
     //     ipId: request.ipId,
     //     licenseTemplate:
     //       (request.licenseTemplate &&
@@ -123,6 +121,7 @@ export class LicenseService {
     // if (isAttachedLicenseTerms) {
     //   return { txHash: "", success: false };
     // }
+
     // const txHash = await this.licensingModuleClient.attachLicenseTerms({
     //   ipId: request.ipId,
     //   licenseTemplate: request.licenseTemplate || this.licenseTemplateClient.address,
@@ -146,20 +145,24 @@ export class LicenseService {
     });
 
     // PIL Term Existed
-    // const licenseTermsId = await this.getLicenseTermsId(licenseTerms);
-    // if (licenseTermsId !== 0n) {
-    //   return { licenseTermsId: licenseTermsId };
-    // }
+    const licenseTermsId = await this.PILicenseTemplateContract.getLicenseTermsId(licenseTerms);
+    if (licenseTermsId !== 0) {
+      return { licenseTermsId: licenseTermsId };
+    }
 
     // Register PIL terms
-    // const txHash = await this.licenseTemplateClient.registerLicenseTerms({ terms: licenseTerms });
-    // if (request.txOptions?.waitForTransaction) {
-    //   const txReceipt = await this.rpcClient.waitForTransactionReceipt({ hash: txHash });
-    //   const targetLogs = this.licenseTemplateClient.parseTxLicenseTermsRegisteredEvent(txReceipt);
-    //   return { txHash: txHash, licenseTermsId: targetLogs[0].licenseTermsId };
-    // } else {
-    //   return { txHash: txHash };
-    // }
+    const txHash = await this.PILicenseTemplateContract.registerLicenseTerms({ terms: licenseTerms });
+    const res = await txHash.wait();
+    if (res.status !== 1) {
+      alert('error message');
+      return "Register fail: " + res.hash
+    }else{
+      // const ipId = await this.contractWithMasterWallet.ipId(
+      //   ENV_CONFIG.NODE.CHAINID,
+      //   nftAddr,
+      //   tokenId
+      // );  
+    }
   }   
 
   /**
@@ -189,21 +192,26 @@ export class LicenseService {
 
   async _isRegistered(nftAddr: string, tokenId: string, chainId: string) {
     // Connecting to smart contract
-    if (!this.contractWithMasterWallet) {
-      this.contractWithMasterWallet = await this._getContract();
-      if (!this.contractWithMasterWallet) {
+    if (!this.ipassetContract) {
+      if (this.ipassetAbi.length == 0) {
+        const abiFilePath = path.resolve(__dirname, '../../web3/ABI/IPAssetRegistry.json');
+        const files = fs.readFileSync(abiFilePath);
+        this.ipassetAbi = JSON.parse(files.toString());
+      }
+      this.ipassetContract = await this._getContract(this.ipassetContractAddr, this.ipassetAbi);
+      if (!this.ipassetContract) {
         const errMsg = `can not get contract With Master Wallet`;
         this._logger.error(errMsg);
         throw new Error(errMsg);
       }
     }
-    const ipId = await this.contractWithMasterWallet.ipId(
+    const ipId = await this.ipassetContract.ipId(
       ENV_CONFIG.NODE.CHAINID,
       nftAddr,
       tokenId
     );
     this._logger.log(`ipId ` + ipId);
-    const isRegistered = await this.contractWithMasterWallet.isRegistered(ipId);
+    const isRegistered = await this.ipassetContract.isRegistered(ipId);
     if(isRegistered){
       return ipId;
     }else{

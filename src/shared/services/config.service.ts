@@ -82,6 +82,9 @@ export class ConfigService {
         DISTUPE: process.env.DISTUPE_ADDRESS,
         DERIVATIVE: process.env.DERIVATIVE_ADDRESS,
         ROYALTY_POLICYLAP: process.env.ROYALTYPOLICYLAP_ADDRESS,
+        LICENSE_TEMPLATE: process.env.LICENSE_TEMPLATE_ADDRESS,
+        LICENSE_REGISTRY: process.env.LICENSE_REGISTRY_ADDRESS,
+        LICENSE_MODULE: process.env.LICENSE_MODULE_ADDRESS,
       },    
       STORY_PROTOCOL_SYNC: {
         IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",

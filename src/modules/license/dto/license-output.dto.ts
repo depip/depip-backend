@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class IpassetOutput {
+export class LicenseOutput {
   @Expose()
   @ApiProperty()
   tx: string;
