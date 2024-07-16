@@ -16,11 +16,19 @@ import axios from 'axios';
 import * as util from 'util';
 import { sha256 } from 'js-sha256';
 import { ENV_CONFIG } from '../shared/services/config.service';
+import {
+  Contract,
+  JsonRpcProvider,
+  Wallet,
+  formatEther,
+  parseEther,
+} from 'ethers';
 
 @Injectable()
 export class CommonUtil {
   private readonly _logger = new Logger(CommonUtil.name);
   constructor(private httpService: HttpService) {}
+  private provider = new JsonRpcProvider(ENV_CONFIG.NODE.RPC);
 
   makeFileObjects(img) {
     // You can create File objects from a Buffer of binary data
@@ -241,4 +249,18 @@ export class CommonUtil {
     }
     return '';
   }
+
+  async getContract(contractAddr, contractAbi) {
+    const masterWallet = new Wallet(ENV_CONFIG.MASTERWALLET, new JsonRpcProvider(ENV_CONFIG.NODE.RPC));
+
+    // Connecting to smart contract
+    const contract = new Contract(
+      contractAddr,
+      contractAbi,
+      this.provider
+    );
+
+    const rs = contract.connect(masterWallet);
+    return rs;
+  }    
 }
