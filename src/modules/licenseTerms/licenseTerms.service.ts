@@ -48,8 +48,9 @@ export class LicenseTermsService {
         error.stack,
       );
       return {
-        error,
-      };
+        status: "fail",
+        error: error,
+      }
     }       
   }
 

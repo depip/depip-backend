@@ -8,5 +8,5 @@ export class LicenseOutput {
 
   @Expose()
   @ApiProperty()
-  ipId: string;
+  status: string;
 }
