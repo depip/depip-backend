@@ -32,27 +32,27 @@ export class LicenseTermsService {
     private commonUtil: CommonUtil
   ) {}  
 
-  async registerLicenseTerms(ipId: string, type: PIL_TYPE, mintingFee: number, currency: string) {
-    try {
-      this._logger.log(`perform register License Terms! `);
-      // Check PIL Terms
-      const licenseTermsId = await this.registerPILTerms(type, mintingFee, currency);
-      console.log("licenseTermsId: " + licenseTermsId)
-      // Register PIL terms
+  // async registerLicenseTerms(ipId: string, type: PIL_TYPE, mintingFee: number, currency: string) {
+  //   try {
+  //     this._logger.log(`perform register License Terms! `);
+  //     // Check PIL Terms
+  //     const licenseTermsId = await this.registerPILTerms(type, mintingFee, currency);
+  //     console.log("licenseTermsId: " + licenseTermsId)
+  //     // Register PIL terms
 
-      // Attack PIL terms
-      const result = await this.attackPILTerms(ipId, licenseTermsId);
-    } catch (error) {
-      this._logger.log(
-        `error when register License Terms: ${ipId}`,
-        error.stack,
-      );
-      return {
-        status: "fail",
-        error: error,
-      }
-    }       
-  }
+  //     // Attack PIL terms
+  //     const result = await this.attackPILTerms(ipId, licenseTermsId);
+  //   } catch (error) {
+  //     this._logger.log(
+  //       `error when register License Terms: ${ipId}`,
+  //       error.stack,
+  //     );
+  //     return {
+  //       status: "fail",
+  //       error: error,
+  //     }
+  //   }       
+  // }
 
   async attackPILTerms(ipId, termId) {
     try {
@@ -73,9 +73,12 @@ export class LicenseTermsService {
       } 
 
       const isAttachedLicenseTerms = await this.licenseRegistryContract.hasIpAttachedLicenseTerms(ipId, this.licenseTemplateAddr, termId);
-      console.log("isAttachedLicenseTerms: " + isAttachedLicenseTerms)
+
       if (isAttachedLicenseTerms) {
-        return termId;
+        return {
+          status: "success",
+          tx: "",
+        }
       }else{
         // Connecting to smart contract
         if (!this.licenseModuleContract) {
@@ -99,7 +102,10 @@ export class LicenseTermsService {
           alert('error message');
           return "Register fail: " + res.hash
         }else{
-          return termId;
+          return {
+            status: "success",
+            tx: res.hash,
+          }
         }      
       }
     } catch (error) {
@@ -108,12 +114,14 @@ export class LicenseTermsService {
         error.stack,
       );
       return {
+        status: "fail",
         error,
       };
     }        
   }    
 
   async registerPILTerms(pilType, mintingFee, currency) {
+    this._logger.log(`perform registerPILTerms! `);
     try {
       // Connecting to smart contract
       if (!this.licenseTemplateContract) {
@@ -143,20 +151,27 @@ export class LicenseTermsService {
       // console.log("licenseTerms: " + json)
       // PIL Term Existed
       const licenseTermsId = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
-
+      
       if (licenseTermsId != 0) {
-        return licenseTermsId;
+        return {
+          status: "success",
+          termId: Number(licenseTermsId),
+        }
       }
       // Register PIL terms
       const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
       const res = await txHash.wait();
-      console.log("res: " + JSON.stringify(res))
       if (res.status !== 1) {
-        alert('error message');
-        return "Register fail: " + res.hash
+        return {
+          status: "fail",
+          error: res.hash,
+        }
       }else{
         const licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
-        return licenseTermsIdNew;
+        return {
+          status: "success",
+          termId: Number(licenseTermsIdNew),
+        }        
       }
     } catch (error) {
       this._logger.log(
@@ -164,8 +179,9 @@ export class LicenseTermsService {
         error.stack,
       );
       return {
-        error,
-      };
+        status: "fail",
+        error: error,
+      }
     }        
   }   
 }

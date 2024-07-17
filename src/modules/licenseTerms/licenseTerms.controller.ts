@@ -22,9 +22,15 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 export class LicenseTermController {
   constructor(private readonly licenseTermSvc: LicenseTermsService) { }
 
-  @Post("register")
+  @Post("registerPILTerms")
   // @UseInterceptors(CacheInterceptor)
-  register(@Body() data: licenseTermsInput) {
-    return this.licenseTermSvc.registerLicenseTerms(data.ipId, data.type, data.mintingFee, data.currency);
+  registerPILTerms(@Body() data: licenseTermsInput) {
+    return this.licenseTermSvc.registerPILTerms(data.type, data.mintingFee, data.currency);
   }
+
+  @Post("attackPILTerms")
+  // @UseInterceptors(CacheInterceptor)
+  attackPILTerms(@Body() data: licenseTermsInput) {
+    return this.licenseTermSvc.attackPILTerms(data.ipId, data.termId);
+  }  
 }
