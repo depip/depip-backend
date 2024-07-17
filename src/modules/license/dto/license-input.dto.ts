@@ -4,9 +4,17 @@ import { Expose } from 'class-transformer';
 export class LicenseInput {
   @Expose()
   @ApiProperty()
-  nftAddress: string;
+  licensorIpId: string;
 
   @Expose()
   @ApiProperty()
-  tokenId: string;
+  licenseTermsId: string;
+
+  @Expose()
+  @ApiProperty()
+  receiver: string;
+  
+  @Expose()
+  @ApiProperty()
+  amount: number;  
 }

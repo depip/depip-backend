@@ -8,13 +8,6 @@ import { CommonUtil } from '../../utils/common.util';
 import LicenseTemplateABI from '../../web3/ABI/LicenseTemplate.json'
 import LicenseRegistryABI from '../../web3/ABI/LicenseRegistry.json'
 import LicenseModuleABI from '../../web3/ABI/LicenseModule.json'
-import {
-  Contract,
-  JsonRpcProvider,
-  Wallet,
-  formatEther,
-  parseEther,
-} from 'ethers';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -25,9 +18,6 @@ const  licenseModuleABIPath = "../../web3/ABI/LicenseModule.json"
 @Injectable()
 export class LicenseTermsService {
   private readonly _logger = new Logger(LicenseTermsService.name);
-  private PROVIDER_URL = ENV_CONFIG.NODE.RPC;
-  // Connecting to provider
-  private PROVIDER = new JsonRpcProvider(this.PROVIDER_URL);
   private licenseRegistryAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE_REGISTRY;
   private licenseTemplateAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE_TEMPLATE;
   private licenseModuleAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE_MODULE;
@@ -57,7 +47,9 @@ export class LicenseTermsService {
         `error when register License Terms: ${ipId}`,
         error.stack,
       );
-      throw error;
+      return {
+        error,
+      };
     }       
   }
 
@@ -114,7 +106,9 @@ export class LicenseTermsService {
         `error when attack PIL Terms: ${termId}`,
         error.stack,
       );
-      throw error;
+      return {
+        error,
+      };
     }        
   }    
 
@@ -168,7 +162,9 @@ export class LicenseTermsService {
         `error when register PIL Terms`,
         error.stack,
       );
-      throw error;
+      return {
+        error,
+      };
     }        
   }   
 }

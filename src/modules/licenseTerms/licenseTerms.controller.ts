@@ -16,7 +16,6 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { LicenseTermsService } from './licenseTerms.service';
 import { licenseTermsInput } from './dto/licenseTerms-input.dto';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { PIL_TYPE } from '../../shared/types/license-type';
 
 @Controller('licenceseTerms')
 @ApiTags('licenceseTerms')
