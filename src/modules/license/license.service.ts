@@ -64,14 +64,20 @@ export class LicenseService {
         alert('error message');
         return "Mint license fail: " + res.hash
       }else{
-        return "Mint license successed, TX: " + res.hash
+        return {
+          status: "successe",
+          tx: res.hash,
+        }
       }
     } catch (error) {
       this._logger.log(
         `error when mint license: ${licensorIpId}`,
         error.stack,
       );
-      throw error;
+      return {
+        status: "fail",
+        error: error,
+      }
     }        
   }
 }

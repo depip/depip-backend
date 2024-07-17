@@ -40,6 +40,7 @@ export class IpassetService {
       const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
       if (isRegistered) {
         return {
+          status: "successe",
           tx: "",
           ipId: isRegistered,
         }
@@ -63,11 +64,11 @@ export class IpassetService {
           tokenId
         );      
 
-        const response: IpassetOutput = {
+        return {
+          status: "successe",
           tx: res.hash,
           ipId: ipId,
         }
-        return response
       }
     } catch (error) {
       this._logger.log(
@@ -75,8 +76,9 @@ export class IpassetService {
         error.stack,
       );
       return {
-        error,
-      };
+        status: "fail",
+        error: error,
+      }
     }       
   }
 
@@ -129,9 +131,7 @@ export class IpassetService {
         `error when call contract :${this.ipassetContractAddr}`,
         error.stack,
       );
-      return {
-        error,
-      };
+      throw error;
     }    
   }  
 
@@ -159,9 +159,7 @@ export class IpassetService {
         `error when call contract :${this.ipassetContractAddr}`,
         error.stack,
       );
-      return {
-        error,
-      };
+      throw error;
     }    
   }   
 }
