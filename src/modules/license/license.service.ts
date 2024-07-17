@@ -65,7 +65,7 @@ export class LicenseService {
         return "Mint license fail: " + res.hash
       }else{
         return {
-          status: "successe",
+          status: "success",
           tx: res.hash,
         }
       }

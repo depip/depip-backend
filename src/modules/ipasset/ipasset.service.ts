@@ -40,7 +40,7 @@ export class IpassetService {
       const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
       if (isRegistered) {
         return {
-          status: "successe",
+          status: "success",
           tx: "",
           ipId: isRegistered,
         }
@@ -65,7 +65,7 @@ export class IpassetService {
         );      
 
         return {
-          status: "successe",
+          status: "success",
           tx: res.hash,
           ipId: ipId,
         }
