@@ -11,6 +11,7 @@ import {
 } from 'ethers';
 import * as fs from 'fs';
 import path from 'path';
+import { IpassetOutput } from './dto/ipasset-output.dto';
 
 @Injectable()
 export class IpassetService {
@@ -36,9 +37,13 @@ export class IpassetService {
         }
       }
 
-      const isRegistered = await this._isRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
+      const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
       if (isRegistered) {
-        return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
+        return {
+          tx: "",
+          ipId: isRegistered,
+        }
+        // return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
       }
       
       this._logger.log(`perform to call contract! `);
@@ -49,7 +54,7 @@ export class IpassetService {
       );
       const res = await tx.wait();
       if (res.status !== 1) {
-        alert('error message');
+        // alert('error message');
         return "Register fail: " + res.hash
       }else{
         const ipId = await this.contractWithMasterWallet.ipId(
@@ -58,14 +63,20 @@ export class IpassetService {
           tokenId
         );      
 
-        return "Register successed, TX: " + res.hash + " IPID: " + ipId
+        const response: IpassetOutput = {
+          tx: res.hash,
+          ipId: ipId,
+        }
+        return response
       }
     } catch (error) {
       this._logger.log(
         `error when register ipasset :${nftAddr}`,
         error.stack,
       );
-      throw error;
+      return {
+        error,
+      };
     }       
   }
 
@@ -90,7 +101,7 @@ export class IpassetService {
     return rs;
   }  
 
-  async _isRegistered(nftAddr: string, tokenId: string, chainId: string) {
+  async isNftRegistered(nftAddr: string, tokenId: string, chainId: string) {
     try {
       // Connecting to smart contract
       if (!this.contractWithMasterWallet) {
@@ -118,7 +129,39 @@ export class IpassetService {
         `error when call contract :${this.ipassetContractAddr}`,
         error.stack,
       );
-      throw error;
+      return {
+        error,
+      };
     }    
   }  
+
+  async isIpIdRegistered(ipId: string) {
+    try {
+      // Connecting to smart contract
+      if (!this.contractWithMasterWallet) {
+        this.contractWithMasterWallet = await this._getContract();
+        if (!this.contractWithMasterWallet) {
+          const errMsg = `can not get contract With Master Wallet`;
+          this._logger.error(errMsg);
+          throw new Error(errMsg);
+        }
+      }
+
+      this._logger.log(`ipId ` + ipId);
+      const isRegistered = await this.contractWithMasterWallet.isRegistered(ipId);
+      if(isRegistered){
+        return ipId;
+      }else{
+        return false;
+      }
+    } catch (error) {
+      this._logger.log(
+        `error when call contract :${this.ipassetContractAddr}`,
+        error.stack,
+      );
+      return {
+        error,
+      };
+    }    
+  }   
 }
