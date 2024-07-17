@@ -15,7 +15,10 @@ export class licenseTermsInput {
   @ApiProperty()
   mintingFee: number;
 
-  
+  @Expose()
+  @ApiProperty()
+  termId: number;
+
   @Expose()
   @ApiProperty()
   currency: string;
