@@ -1,34 +1,22 @@
 import { Queue } from 'bull';
 import { IpassetService } from '../ipasset/ipasset.service';
 import { InjectQueue } from '@nestjs/bull';
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ENV_CONFIG } from '../../shared/services/config.service';
-import {
-  BedrockAgentRuntimeClient,
-  InvokeAgentCommand,
-} from "@aws-sdk/client-bedrock-agent-runtime";
+import { BedrockAgentRuntimeClient, InvokeAgentCommand } from '@aws-sdk/client-bedrock-agent-runtime';
 import { parse } from 'path';
-
-
 
 @Injectable()
 export class BedrockAgentService {
   private readonly _logger = new Logger(BedrockAgentService.name);
-  
-  constructor(
-    private ipassetService: IpassetService,
-    // private redisClientService: RedisService,
 
+  constructor(
+    private ipassetService: IpassetService // private redisClientService: RedisService,
   ) {}
 
-  async sendAskingText(prompt: string, sessionId: string) {
+  async sendAskingText(prompt: string, sessionId: string, endSession: boolean) {
     try {
-      let agentRes = await this.invokeBedrockAgent(prompt, sessionId);
+      let agentRes = await this.invokeBedrockAgent(prompt, sessionId, endSession);
       return agentRes;
     } catch (errors) {
       return {
@@ -36,7 +24,6 @@ export class BedrockAgentService {
       };
     }
   }
-
 
   /**
    * @typedef {Object} ResponseBody
@@ -50,7 +37,7 @@ export class BedrockAgentService {
    * @param {string} prompt - The prompt that you want the Agent to complete.
    * @param {string} sessionId - An arbitrary identifier for the session.
    */
-  async invokeBedrockAgent (prompt, sessionId) {
+  async invokeBedrockAgent(prompt: string, sessionId: string, endSession: boolean) {
     // const client = new BedrockAgentRuntimeClient({ region: "ap-southeast-2" });
     const client = new BedrockAgentRuntimeClient({
       region: ENV_CONFIG.BEDROCK.REGION,
@@ -68,19 +55,20 @@ export class BedrockAgentService {
       agentAliasId,
       sessionId,
       inputText: prompt,
+      endSession: endSession,
     });
 
     try {
-      let completion = "";
+      let completion = '';
       const response = await client.send(command);
-      
+
       if (response.completion === undefined) {
-        throw new Error("Completion is undefined");
+        throw new Error('Completion is undefined');
       }
 
       for await (let chunkEvent of response.completion) {
         const chunk = chunkEvent.chunk;
-        const decodedResponse = new TextDecoder("utf-8").decode(chunk.bytes);
+        const decodedResponse = new TextDecoder('utf-8').decode(chunk.bytes);
         completion += decodedResponse;
       }
 
@@ -100,25 +88,23 @@ export class BedrockAgentService {
     } catch (err) {
       console.error(err);
     }
-  };
+  }
 
-  async registerIpasset (nftAddr, tokenId) {
+  async registerIpasset(nftAddr, tokenId) {
     try {
       const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
       return res;
     } catch (error) {
-      return "Register fail: " + error
+      return 'Register fail: ' + error;
     }
-  };
+  }
 
-  async mintLicenseToken (nftAddr, tokenId) {
+  async mintLicenseToken(nftAddr, tokenId) {
     try {
       const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
       return res;
     } catch (error) {
-      return "Register fail: " + error
+      return 'Register fail: ' + error;
     }
-  };  
+  }
 }
-
-
