@@ -85,6 +85,8 @@ export class ConfigService {
         LICENSE_TEMPLATE: process.env.LICENSE_TEMPLATE_ADDRESS,
         LICENSE_REGISTRY: process.env.LICENSE_REGISTRY_ADDRESS,
         LICENSE_MODULE: process.env.LICENSE_MODULE_ADDRESS,
+        SPG: process.env.SPG_ADDRESS,
+        NFT: process.env.NFT_ADDRESS,
       },    
       STORY_PROTOCOL_SYNC: {
         IPASSET_SYNC: process.env.IPASSET_SYNC || "IPAsset",
