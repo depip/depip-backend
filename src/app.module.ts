@@ -25,6 +25,7 @@ import { Derivative } from './entities/derivative.entity';
 import { IpassetModule } from './modules/ipasset/ipasset.module';
 import { LicenseTermsModule } from './modules/licenseTerms/licenseTerms.module';
 import { LicenseModule } from './modules/license/license.module';
+import { SpgModule } from './modules/spg/spg.module';
 
 const controllers = [];
 const entities = [BlockSync, IPAassets, LicenseToken,DisputeRaise, DisputeCancelled, Derivative];
@@ -73,6 +74,7 @@ const processors = [];
     IpassetModule,
     LicenseTermsModule,
     LicenseModule,
+    SpgModule,
     TypeOrmModule.forFeature([...entities]),
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],

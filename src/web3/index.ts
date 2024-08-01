@@ -1,9 +1,10 @@
 import {Web3} from "web3";
 import { ENV_CONFIG } from '../shared/services/config.service';
 import  IPAssetRegistryABI  from "./ABI/IPAssetRegistry.json"
+import  { NFTAbi }  from "./ABI/NFT"
 import { AbiItem } from 'web3-utils'
 
-// const web3 = new Web3(ENV_CONFIG.NODE.RPC) 
+import * as abiDecoder from 'abi-decoder'; // NodeJS
 
 export const web3 = new Web3(
     new Web3.providers.HttpProvider(ENV_CONFIG.NODE.RPC)
@@ -39,6 +40,20 @@ export async function getPastEventsByContract(fromBlock, toBlock, contract) {
             reject(null)
         }
     })))    
-    console.log(`newIPasset: ` + JSON.stringify(newIPasset));
+    // console.log(`newIPasset: ` + JSON.stringify(newIPasset));
     return newIPasset
+}
+
+export async function parseTokenId(tx) {
+    const result = await web3.eth.getTransactionReceipt(tx)
+    const TRANSFER_EVENT_SIGNATURE = web3.utils.keccak256("minted(uint256,address)");
+    let tokenId
+    for (let log of result.logs) {
+        if (log.topics[0] == TRANSFER_EVENT_SIGNATURE) {
+            tokenId = web3.eth.abi.decodeParameter("uint256", log.topics[1].toString());
+            break;
+        }
+    }
+
+    return tokenId
 }
