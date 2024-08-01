@@ -81,7 +81,7 @@ export class IPFSService implements OnModuleInit {
     await this.createFolderIfNotExist(ipfsFolderPath);
 
     const ipfsPath = `${ipfsFolderPath}${name}`;
-    const content = JSON.stringify(omit(object, ['filename', 'name']));
+    const content = JSON.stringify(omit(object, ['filename']));
 
     await this.ipfsClient.files.write(ipfsPath, content, { create: true });
 
