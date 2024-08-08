@@ -20,11 +20,11 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 @Controller('bedrock')
 @ApiTags('bedrockAgent')
 export class BedrockAgentController {
-  constructor(private readonly bedrockAgentSvc: BedrockAgentService) { }
+  constructor(private readonly bedrockAgentSvc: BedrockAgentService) {}
 
-  @Post("bedrock-agent")
+  @Post('bedrock-agent')
   // @UseInterceptors(CacheInterceptor)
   bedrockAgent(@Body() data: BedrockAgentPrompt) {
-    return this.bedrockAgentSvc.sendAskingText(data.prompt, data.sessionId);
+    return this.bedrockAgentSvc.sendAskingText(data.prompt, data.sessionId, data.endSession);
   }
 }

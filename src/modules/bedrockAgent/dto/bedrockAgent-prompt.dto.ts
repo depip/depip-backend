@@ -9,4 +9,8 @@ export class BedrockAgentPrompt {
   @Expose()
   @ApiProperty()
   sessionId: string;
+
+  @Expose()
+  @ApiProperty()
+  endSession: boolean;
 }
