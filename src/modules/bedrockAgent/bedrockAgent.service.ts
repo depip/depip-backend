@@ -90,21 +90,21 @@ export class BedrockAgentService {
     }
   }
 
-  async registerIpasset(nftAddr, tokenId) {
-    try {
-      const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
-      return res;
-    } catch (error) {
-      return 'Register fail: ' + error;
-    }
-  }
+  // async registerIpasset (nftAddr, tokenId) {
+  //   try {
+  //     const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
+  //     return res;
+  //   } catch (error) {
+  //     return "Register fail: " + error
+  //   }
+  // };
 
-  async mintLicenseToken(nftAddr, tokenId) {
-    try {
-      const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
-      return res;
-    } catch (error) {
-      return 'Register fail: ' + error;
-    }
-  }
+  // async mintLicenseToken (nftAddr, tokenId) {
+  //   try {
+  //     const res = await this.ipassetService.registerIpasset(nftAddr, tokenId);
+  //     return res;
+  //   } catch (error) {
+  //     return "Register fail: " + error
+  //   }
+  // };  
 }

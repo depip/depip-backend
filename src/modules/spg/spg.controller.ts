@@ -15,13 +15,17 @@ import {
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SPGService } from './spg.service';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 import { spgInput } from './dto/spg-input.dto';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('SPG')
 @ApiTags('spg')
 export class SpgController {
-  constructor(private readonly spgSvc: SPGService) { }
+  constructor(
+    private readonly spgSvc: SPGService,
+    private readonly smartAccountSvc: SmartAccountService
+  ) { }
 
   @Post("mintAndRegistryIp")
   @ApiConsumes('multipart/form-data')
@@ -32,7 +36,13 @@ export class SpgController {
     @UploadedFile() file: Express.Multer.File  
   ) {
 
-    return this.spgSvc.mintAndRegistryIp(data.name, data.description, data.recipient, file);
+    return this.spgSvc.mintAndRegistryIp(data.name, data.description, data.recipient, data.session, file);
   }
   
+
+  @Post("smartAccount")
+  // @UseInterceptors(CacheInterceptor)
+  smartAccount() {
+    return this.smartAccountSvc.getAccountInfor();
+  }  
 }

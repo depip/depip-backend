@@ -4,6 +4,7 @@ import { SpgController } from './spg.controller';
 import { BullModule } from '@nestjs/bull';
 import { IPFSService } from '../files/ipfs.service';
 import { IpassetService } from '../ipasset/ipasset.service';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { IpassetService } from '../ipasset/ipasset.service';
       name: 'SPG',
     }),
   ],
-  providers: [SPGService, IPFSService, IpassetService],
+  providers: [SPGService, IPFSService, IpassetService, SmartAccountService],
   controllers: [SpgController],
 })
 export class SpgModule {}

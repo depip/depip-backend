@@ -23,7 +23,7 @@ export class LicenseService {
     private commonUtil: CommonUtil,
   ) {}  
 
-  async mintLicenses(licensorIpId: string, licenseTermsId: string, receiver: string, amount: number) {
+  async mintLicenses(licensorIpId: string, licenseTermsId: string, receiver: string, amount: number, session) {
     this._logger.log(`perform registration ipasset! `);
     try {
       // Check registed Ipasset

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import {LicenseTermsService } from './licenseTerms.service';
 import { LicenseTermController } from './licenseTerms.controller';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 
 @Module({
   imports: [
@@ -9,7 +10,7 @@ import { LicenseTermController } from './licenseTerms.controller';
       name: 'LicenseTerm',
     }),
   ],
-  providers: [LicenseTermsService],
+  providers: [LicenseTermsService, SmartAccountService],
   controllers: [LicenseTermController],
 })
 export class LicenseTermsModule {}

@@ -25,12 +25,12 @@ export class LicenseTermController {
   @Post("registerPILTerms")
   // @UseInterceptors(CacheInterceptor)
   registerPILTerms(@Body() data: licenseTermsInput) {
-    return this.licenseTermSvc.registerPILTerms(data.type, data.mintingFee, data.currency);
+    return this.licenseTermSvc.registerPILTerms(data.type, data.mintingFee, data.currency, data.session);
   }
 
   @Post("attackPILTerms")
   // @UseInterceptors(CacheInterceptor)
   attackPILTerms(@Body() data: licenseTermsInput) {
-    return this.licenseTermSvc.attackPILTerms(data.ipId, data.termId);
+    return this.licenseTermSvc.attackPILTerms(data.ipId, data.termId, data.session);
   }  
 }

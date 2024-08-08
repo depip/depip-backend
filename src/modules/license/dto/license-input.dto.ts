@@ -17,4 +17,8 @@ export class LicenseInput {
   @Expose()
   @ApiProperty()
   amount: number;  
+
+  @Expose()
+  @ApiProperty()
+  session: any;    
 }

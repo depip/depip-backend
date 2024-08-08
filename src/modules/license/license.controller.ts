@@ -25,6 +25,6 @@ export class LicenseController {
   @Post("mintLicense")
   // @UseInterceptors(CacheInterceptor)
   mintLicense(@Body() data: LicenseInput) {
-    return this.licenseSvc.mintLicenses(data.licensorIpId, data.licenseTermsId, data.receiver, data.amount);
+    return this.licenseSvc.mintLicenses(data.licensorIpId, data.licenseTermsId, data.receiver, data.amount, data.session);
   }
 }
