@@ -29,7 +29,7 @@ export class SPGService {
     private ipassetService: IpassetService,
   ) {}    
 
-  async mintAndRegistryIp(name: string, description: string, recipient: string, image: Express.Multer.File) {
+  async mintAndRegistryIp(name: string, description: string, recipient: string, session, image: Express.Multer.File) {
     this._logger.log(`perform mint a nft! `);
     try {
       // Connecting to smart contract
@@ -95,7 +95,7 @@ export class SPGService {
       const tokenId = await parseTokenId(tx.hash);   
       console.log("tokenId: " + tokenId);  
       // - Register IPaseet
-      const ipIdRegisted = await this.ipassetService.registerIpasset(this.NFTAddr, tokenId.toString())
+      const ipIdRegisted = await this.ipassetService.registerIpasset(this.NFTAddr, tokenId.toString(), session, recipient)
 
       return {
         nft: {

@@ -3,6 +3,7 @@ import {LicenseService } from './license.service';
 import { BullModule } from '@nestjs/bull';
 import { IpassetService } from '../ipasset/ipasset.service';
 import { LicenseController } from './license.controller';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 
 @Module({
   imports: [
@@ -10,7 +11,7 @@ import { LicenseController } from './license.controller';
       name: 'License',
     }),
   ],  
-  providers: [LicenseService, IpassetService],
+  providers: [LicenseService, IpassetService, SmartAccountService],
   controllers: [LicenseController],
 })
 export class LicenseModule {}

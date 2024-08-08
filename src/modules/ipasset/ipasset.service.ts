@@ -11,7 +11,7 @@ import {
 } from 'ethers';
 import * as fs from 'fs';
 import path from 'path';
-import { IpassetOutput } from './dto/ipasset-output.dto';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 
 @Injectable()
 export class IpassetService {
@@ -24,7 +24,11 @@ export class IpassetService {
   private contractWithMasterWallet = null;
   private masterWallet = null;
 
-  async registerIpasset(nftAddr: string, tokenId: string) {
+  constructor(
+    private smartAccountService: SmartAccountService,
+  ) {}      
+
+  async registerIpasset(nftAddr: string, tokenId: string, session: any, userWallet: string) {
     this._logger.log(`perform registration ipasset! `);
     try {
       // Connecting to smart contract
@@ -48,6 +52,10 @@ export class IpassetService {
       }
       
       this._logger.log(`perform to call contract! `);
+
+      const txRaw = await this.contractWithMasterWallet.register.populateTransaction(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
+      const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)
+
       const tx = await this.contractWithMasterWallet.register(
         ENV_CONFIG.NODE.CHAINID,
         nftAddr,

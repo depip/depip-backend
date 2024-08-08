@@ -10,6 +10,10 @@ export class spgInput {
 
   @ApiProperty()
   recipient: string;
+
+  @Expose()
+  @ApiProperty()
+  session: any;    
   
   @ApiProperty({ type: 'string', format: 'binary' })
   file: Express.Multer.File;

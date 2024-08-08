@@ -54,7 +54,7 @@ export class LicenseTermsService {
   //   }       
   // }
 
-  async attackPILTerms(ipId, termId) {
+  async attackPILTerms(ipId, termId, session) {
     try {
       // Connecting to smart contract
       if (!this.licenseRegistryContract) {
@@ -120,7 +120,7 @@ export class LicenseTermsService {
     }        
   }    
 
-  async registerPILTerms(pilType, mintingFee, currency) {
+  async registerPILTerms(pilType, mintingFee, currency, session) {
     this._logger.log(`perform registerPILTerms! `);
     try {
       // Connecting to smart contract
