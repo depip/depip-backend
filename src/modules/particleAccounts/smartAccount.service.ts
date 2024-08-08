@@ -92,7 +92,7 @@ export class SmartAccountService implements OnModuleInit {
 
     const resGetFeeQuotes = await this.getFeeQuotes(this.smartAccount, tx)
 
-    // console.log("tx: " + JSON.stringify(tx));
+    console.log("tx: " + JSON.stringify(tx));
     // console.log("resGetFeeQuotes: " + JSON.stringify(resGetFeeQuotes));
     const userOp = resGetFeeQuotes.result.verifyingPaymasterGasless.userOp;
     const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
@@ -182,30 +182,33 @@ export class SmartAccountService implements OnModuleInit {
       const smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: account };
       const resGetFeeQuotes = await this.getFeeQuotes(smartAccount, txs)
 
-      console.log("resGetFeeQuotes: " + JSON.stringify(resGetFeeQuotes));
-      const userOp = resGetFeeQuotes.result.verifyingPaymasterGasless.userOp;
-      const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
-      userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
-
-      const resSendUserOp = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
-        method: "particle_aa_sendUserOp",
-        params: [
-          smartAccount, 
-          userOp,        
+      if(!resGetFeeQuotes.error){
+        const userOp = resGetFeeQuotes.result.verifyingPaymasterGasless.userOp;
+        const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
+        userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
+  
+        const resSendUserOp = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+          method: "particle_aa_sendUserOp",
+          params: [
+            smartAccount, 
+            userOp,        
+            {
+            sessions, // all sessions to generate proof
+            targetSession: sessions[0], // which session to use in this userOp
+            },
+          ],
+        },
           {
-          sessions, // all sessions to generate proof
-          targetSession: sessions[0], // which session to use in this userOp
-          },
-        ],
-      },
-        {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
-      });
-
-      return resSendUserOp
+            auth: {
+                username: projectId,
+                password: projectServerKey,
+            },
+        });
+        console.log("resSendUserOp: " + JSON.stringify(resSendUserOp.data));
+        return resSendUserOp.data
+      } else {
+        return resGetFeeQuotes
+      }
     } catch (error) {
       const errorMsg = `Error while call from particle! ${error}`;
       throw new Error(errorMsg);
@@ -297,7 +300,7 @@ export class SmartAccountService implements OnModuleInit {
               password: projectServerKey,
           },
       });
-
+      console.log("response.data: " + JSON.stringify(response.data))
       return response.data
     } catch (error) {
       const errorMsg = `Error while call from particle! ${error}`;

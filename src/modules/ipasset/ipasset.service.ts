@@ -56,15 +56,13 @@ export class IpassetService {
       const txRaw = await this.contractWithMasterWallet.register.populateTransaction(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
       const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)
 
-      const tx = await this.contractWithMasterWallet.register(
-        ENV_CONFIG.NODE.CHAINID,
-        nftAddr,
-        tokenId
-      );
-      const res = await tx.wait();
-      if (res.status !== 1) {
+      if (txSigned.error) {
         // alert('error message');
-        return "Register fail: " + res.hash
+        return {
+          status: "fail",
+          error: txSigned.error.data.extraMessage
+        }
+
       }else{
         const ipId = await this.contractWithMasterWallet.ipId(
           ENV_CONFIG.NODE.CHAINID,
@@ -74,10 +72,32 @@ export class IpassetService {
 
         return {
           status: "success",
-          tx: res.hash,
+          tx: txSigned.result,
           ipId: ipId,
         }
       }
+      // const tx = await this.contractWithMasterWallet.register(
+      //   ENV_CONFIG.NODE.CHAINID,
+      //   nftAddr,
+      //   tokenId
+      // );
+      // const res = await tx.wait();
+      // if (res.status !== 1) {
+      //   // alert('error message');
+      //   return "Register fail: " + res.hash
+      // }else{
+      //   const ipId = await this.contractWithMasterWallet.ipId(
+      //     ENV_CONFIG.NODE.CHAINID,
+      //     nftAddr,
+      //     tokenId
+      //   );      
+
+      //   return {
+      //     status: "success",
+      //     tx: res.hash,
+      //     ipId: ipId,
+      //   }
+      // }
     } catch (error) {
       this._logger.log(
         `error when register ipasset :${nftAddr}`,
@@ -85,7 +105,7 @@ export class IpassetService {
       );
       return {
         status: "fail",
-        error: error,
+        error: "simulate fail when register ipasset ",
       }
     }       
   }
