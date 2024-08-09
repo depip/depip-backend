@@ -110,6 +110,64 @@ export class IpassetService {
     }       
   }
 
+  async registerIpassetOld(nftAddr: string, tokenId: string) {
+    this._logger.log(`perform registration ipasset! `);
+    try {
+      // Connecting to smart contract
+      if (!this.contractWithMasterWallet) {
+        this.contractWithMasterWallet = await this._getContract();
+        if (!this.contractWithMasterWallet) {
+          const errMsg = `can not get contract With Master Wallet`;
+          this._logger.error(errMsg);
+          throw new Error(errMsg);
+        }
+      }
+
+      const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
+      if (isRegistered) {
+        return {
+          status: "success",
+          tx: "",
+          ipId: isRegistered,
+        }
+        // return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
+      }
+      
+      this._logger.log(`perform to call contract! `);
+      const tx = await this.contractWithMasterWallet.register(
+        ENV_CONFIG.NODE.CHAINID,
+        nftAddr,
+        tokenId
+      );
+      const res = await tx.wait();
+      if (res.status !== 1) {
+        // alert('error message');
+        return "Register fail: " + res.hash
+      }else{
+        const ipId = await this.contractWithMasterWallet.ipId(
+          ENV_CONFIG.NODE.CHAINID,
+          nftAddr,
+          tokenId
+        );      
+
+        return {
+          status: "success",
+          tx: res.hash,
+          ipId: ipId,
+        }
+      }
+    } catch (error) {
+      this._logger.log(
+        `error when register ipasset :${nftAddr}`,
+        error.stack,
+      );
+      return {
+        status: "fail",
+        error: "simulate fail when register ipasset ",
+      }
+    }       
+  }  
+
   async _getContract() {
     this.masterWallet = new Wallet(ENV_CONFIG.MASTERWALLET, new JsonRpcProvider(this.PROVIDER_URL));
     if (!this.masterWallet) return null;

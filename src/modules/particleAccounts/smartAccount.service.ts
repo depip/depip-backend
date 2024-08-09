@@ -12,9 +12,9 @@ const { Utils } = require("alchemy-sdk");
 export class SmartAccountService implements OnModuleInit {
   private readonly logger = new Logger(SmartAccountService.name);
   private provider = new ethers.JsonRpcProvider(ENV_CONFIG.NODE.RPC);
-  private mainSigner = new Wallet("090bccb9b637f34df32c5aee485f8a1ee817807bcc6b16e2124a7bf71025f5d5", this.provider);
+  private mainSigner = new Wallet("ad5f4007518e151531e410e9692345806ebfb12c2683de4f4345273d7c31fd89", this.provider);
   private sessionSigner = new Wallet(ENV_CONFIG.MASTERWALLET, this.provider)
-  // private sessionSigner = Wallet.createRandom();
+  // private mainSigner = Wallet.createRandom();
   private smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: this.mainSigner.address };
 
 
@@ -26,7 +26,7 @@ export class SmartAccountService implements OnModuleInit {
         'content-type': 'application/json',
       });
     try {
-      const response = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_getSmartAccount',
@@ -68,7 +68,7 @@ export class SmartAccountService implements OnModuleInit {
     const sessions = resCreateSessions.result.sessions; // the sessions you need to store locally
     userOpA.signature = await this.mainSigner.signMessage(Utils.arrayify(userOpHashA));
 
-    await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+    await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         method: "particle_aa_sendUserOp",
         params: [this.smartAccount, userOpA],
     }, 
@@ -84,42 +84,42 @@ export class SmartAccountService implements OnModuleInit {
     console.log("sessions: " + JSON.stringify(sessions));
     // console.log("resSendUserOpA: " + JSON.stringify(resSendUserOpA.data));
 
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-    await sleep(15000)
+    // const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+    // await sleep(15000)
 
-    const erc1155Contract = new Contract(nft1155ContractAddress, ["function mintTo(address, uint256, uint256) public"], this.provider);
-    const tx = await erc1155Contract.mintTo.populateTransaction("0x7c756cba10ff2c65016494e8ba37c12a108572b5", 1, 1);
+    // const erc1155Contract = new Contract(nft1155ContractAddress, ["function mintTo(address, uint256, uint256) public"], this.provider);
+    // const tx = await erc1155Contract.mintTo.populateTransaction("0x7c756cba10ff2c65016494e8ba37c12a108572b5", 1, 1);
 
-    const resGetFeeQuotes = await this.getFeeQuotes(this.smartAccount, tx)
+    // const resGetFeeQuotes = await this.getFeeQuotes(this.smartAccount, tx)
 
-    console.log("tx: " + JSON.stringify(tx));
-    // console.log("resGetFeeQuotes: " + JSON.stringify(resGetFeeQuotes));
-    const userOp = resGetFeeQuotes.result.verifyingPaymasterGasless.userOp;
-    const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
-    userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
+    // console.log("tx: " + JSON.stringify(tx));
+    // // console.log("resGetFeeQuotes: " + JSON.stringify(resGetFeeQuotes));
+    // const userOp = resGetFeeQuotes.result.verifyingPaymasterGasless.userOp;
+    // const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
+    // userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
 
-    // const userOp = await this.createUserOp(this.smartAccount, tx)
-    // const userOpHash = userOp.userOpHash;
-    // userOp.userOp.signature = await this.mainSigner.signMessage(Utils.arrayify(userOpHash));
+    // // const userOp = await this.createUserOp(this.smartAccount, tx)
+    // // const userOpHash = userOp.userOpHash;
+    // // userOp.userOp.signature = await this.mainSigner.signMessage(Utils.arrayify(userOpHash));
     
-    const resSendUserOp = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
-      method: "particle_aa_sendUserOp",
-      params: [
-        this.smartAccount, 
-        userOp,        
-        {
-        sessions, // all sessions to generate proof
-        targetSession: sessions[0], // which session to use in this userOp
-        },
-      ],
-    },
-      {
-        auth: {
-            username: projectId,
-            password: projectServerKey,
-        },
-    });
-    console.log("resSendUserOp: " + JSON.stringify(resSendUserOp.data));
+    // const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+    //   method: "particle_aa_sendUserOp",
+    //   params: [
+    //     this.smartAccount, 
+    //     userOp,        
+    //     {
+    //     sessions, // all sessions to generate proof
+    //     targetSession: sessions[0], // which session to use in this userOp
+    //     },
+    //   ],
+    // },
+    //   {
+    //     auth: {
+    //         username: projectId,
+    //         password: projectServerKey,
+    //     },
+    // });
+    // console.log("resSendUserOp: " + JSON.stringify(resSendUserOp.data));
 
     } catch (error) {
       const errorMsg = `Error while call from particle! ${error}`;
@@ -133,7 +133,7 @@ export class SmartAccountService implements OnModuleInit {
       });
 
     try {
-      const response = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_createUserOp',
@@ -187,7 +187,7 @@ export class SmartAccountService implements OnModuleInit {
         const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
         userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
   
-        const resSendUserOp = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+        const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
           method: "particle_aa_sendUserOp",
           params: [
             smartAccount, 
@@ -216,13 +216,9 @@ export class SmartAccountService implements OnModuleInit {
   }  
 
 
-  async sendUserOp(account, userOp) {
-    const headers = ({
-        'content-type': 'application/json',
-      });
-
+  async sendUserOp(account, userOp, sessions) {
     try {
-      const response = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_sendUserOp',
@@ -232,38 +228,10 @@ export class SmartAccountService implements OnModuleInit {
           // user op
           userOp,
           // // Optional
-          // {
-          //   "sessions": [
-          //       {
-          //           "validUntil": 0,
-          //           "validAfter": 0,
-          //           "sessionValidationModule": "0x4b7f018Fa27a97b6a17b6d4d8Cb3c0e2D9340133",
-          //           "sessionKeyDataInAbi": [ // or use sessionKeyData to replace
-          //               ["address", "address", "address", "uint256"],
-          //               [
-          //                   "0x1dacDa1087C4048774bEce7784EB8EC4CfBeDB2c",
-          //                   "0xC79b817AcA1395D2Ae45809E63AF338E6C2903F5",
-          //                   "0x11D266772b85C2C5D4f84A41ca3E08e9f04Fb5D3",
-          //                   1
-          //               ]
-          //           ]
-          //       }
-          //   ],
-          //   "targetSession": {
-          //       "validUntil": 0,
-          //       "validAfter": 0,
-          //       "sessionValidationModule": "0x4b7f018Fa27a97b6a17b6d4d8Cb3c0e2D9340133",
-          //       "sessionKeyDataInAbi": [ // or use sessionKeyData to replace
-          //           ["address", "address", "address", "uint256"],
-          //           [
-          //               "0x1dacDa1087C4048774bEce7784EB8EC4CfBeDB2c",
-          //               "0xC79b817AcA1395D2Ae45809E63AF338E6C2903F5",
-          //               "0x11D266772b85C2C5D4f84A41ca3E08e9f04Fb5D3",
-          //               1
-          //           ]
-          //       ]
-          //   }
-          // }  
+          {
+            sessions,
+            targetSession: sessions[0],
+          }  
         ],
       }, {
           auth: {
@@ -273,22 +241,22 @@ export class SmartAccountService implements OnModuleInit {
       });
 
       // console.log(response);
-      return response
+      return response.data
     } catch (error) {
       const errorMsg = `Error while call from particle! ${error}`;
       throw new Error(errorMsg);
     }
   }  
 
-  async getFeeQuotes(acount, txs) {
+  async getFeeQuotes(account, txs) {
     try {
-      const response = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_getFeeQuotes',
         params: [
           // account config
-          acount,
+          account,
           // txs
           [
             txs
@@ -308,49 +276,22 @@ export class SmartAccountService implements OnModuleInit {
     }
   }
 
-  async validateSession() {
+  async validateSession(account, sessions) {
     const headers = ({
         'content-type': 'application/json',
       });
 
     try {
-      const response = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_validateSession',
         params: [
           // account config
-          this.smartAccount,
+          account,
           {
-            "sessions": [
-              {
-                "validUntil": 0,
-                "validAfter": 0,
-                "sessionValidationModule": "0x9903F5a04d994122Db1E002A6f5769Dd274C18aA",
-                "sessionKeyDataInAbi": [ // or use sessionKeyData to replace
-                    ["address", "address", "uint256"],
-                    [
-                        "0x7c756Cba10Ff2C65016494E8BA37C12a108572b5",
-                        "0x7c756Cba10Ff2C65016494E8BA37C12a108572b5",
-                        1
-                    ]
-                ]
-              }
-            ],
-            "targetSession": 
-            {
-              "validUntil": 0,
-              "validAfter": 0,
-              "sessionValidationModule": "0x9903F5a04d994122Db1E002A6f5769Dd274C18aA",
-              "sessionKeyDataInAbi": [ // or use sessionKeyData to replace
-                  ["address", "address", "uint256"],
-                  [
-                      "0x7c756Cba10Ff2C65016494E8BA37C12a108572b5",
-                      "0x7c756Cba10Ff2C65016494E8BA37C12a108572b5",
-                      1
-                  ]
-              ]
-            }
+            "sessions": sessions,
+            "targetSession": sessions[0]
           }             
         ],
       }, {
@@ -373,7 +314,7 @@ export class SmartAccountService implements OnModuleInit {
       });
 
     try {
-      const response = await axios.post(`https://rpc.particle.network/evm-chain?chainId=${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_createSessions',
