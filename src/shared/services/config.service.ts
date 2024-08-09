@@ -94,6 +94,9 @@ export class ConfigService {
         DISPUTE_SYNC: process.env.LICENSE_SYNC || "License",
         DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || "Derivative",
       },   
+      PARTICAL_NETWORK: {
+        PARTICAL_RPC_URL: process.env.PARTICAL_RPC_URL || "https://rpc.particle.network/evm-chain?chainId=",
+      },       
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,
         COIN_MINIMAL_DENOM: process.env.COIN_MINIMAL_DENOM,

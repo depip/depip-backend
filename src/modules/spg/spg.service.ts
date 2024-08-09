@@ -95,7 +95,7 @@ export class SPGService {
       const tokenId = await parseTokenId(tx.hash);   
       console.log("tokenId: " + tokenId);  
       // - Register IPaseet
-      const ipIdRegisted = await this.ipassetService.registerIpasset(this.NFTAddr, tokenId.toString(), session, recipient)
+      const ipIdRegisted = await this.ipassetService.registerIpassetOld(this.NFTAddr, tokenId.toString())
 
       return {
         nft: {
