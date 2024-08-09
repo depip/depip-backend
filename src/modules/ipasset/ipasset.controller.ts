@@ -25,6 +25,7 @@ export class IpassetController {
   @Post("register")
   // @UseInterceptors(CacheInterceptor)
   ipassetRegister(@Body() data: IpassetInput) {
-    return this.ipassetSvc.registerIpasset(data.nftAddress, data.tokenId, data.session, data.userWallet);
+    // return this.ipassetSvc.registerIpasset(data.nftAddress, data.tokenId, data.session, data.userWallet);
+    return this.ipassetSvc.registerIpassetOld(data.nftAddress, data.tokenId);
   }
 }
