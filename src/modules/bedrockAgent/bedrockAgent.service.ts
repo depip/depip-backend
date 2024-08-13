@@ -9,10 +9,20 @@ import { parse } from 'path';
 @Injectable()
 export class BedrockAgentService {
   private readonly _logger = new Logger(BedrockAgentService.name);
+  private _bedrockClient: BedrockAgentRuntimeClient;
+  private _agentId: string = ENV_CONFIG.BEDROCK.AGENTID;
+  private _agentAliasId: string = ENV_CONFIG.BEDROCK.AGENTALIASID;
 
-  constructor(
-    private ipassetService: IpassetService // private redisClientService: RedisService,
-  ) {}
+  constructor() // private ipassetService: IpassetService // private redisClientService: RedisService,
+  {
+    this._bedrockClient = new BedrockAgentRuntimeClient({
+      region: ENV_CONFIG.BEDROCK.REGION,
+      credentials: {
+        accessKeyId: ENV_CONFIG.BEDROCK.ACCESSKEY, // permission to invoke agent
+        secretAccessKey: ENV_CONFIG.BEDROCK.SECRET,
+      },
+    });
+  }
 
   async sendAskingText(prompt: string, sessionId: string, endSession: boolean) {
     try {
@@ -38,18 +48,8 @@ export class BedrockAgentService {
    * @param {string} sessionId - An arbitrary identifier for the session.
    */
   async invokeBedrockAgent(prompt: string, sessionId: string, endSession: boolean) {
-    // const client = new BedrockAgentRuntimeClient({ region: "ap-southeast-2" });
-    const client = new BedrockAgentRuntimeClient({
-      region: ENV_CONFIG.BEDROCK.REGION,
-      credentials: {
-        accessKeyId: ENV_CONFIG.BEDROCK.ACCESSKEY, // permission to invoke agent
-        secretAccessKey: ENV_CONFIG.BEDROCK.SECRET,
-      },
-    });
-
-    const agentId = ENV_CONFIG.BEDROCK.AGENTID;
-    const agentAliasId = ENV_CONFIG.BEDROCK.AGENTALIASID;
-
+    const agentId = this._agentId;
+    const agentAliasId = this._agentAliasId;
     const command = new InvokeAgentCommand({
       agentId,
       agentAliasId,
@@ -60,7 +60,7 @@ export class BedrockAgentService {
 
     try {
       let completion = '';
-      const response = await client.send(command);
+      const response = await this._bedrockClient.send(command);
 
       if (response.completion === undefined) {
         throw new Error('Completion is undefined');
@@ -87,6 +87,7 @@ export class BedrockAgentService {
       return { sessionId: sessionId, completion };
     } catch (err) {
       console.error(err);
+      return err;
     }
   }
 
@@ -106,5 +107,5 @@ export class BedrockAgentService {
   //   } catch (error) {
   //     return "Register fail: " + error
   //   }
-  // };  
+  // };
 }
