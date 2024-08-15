@@ -31,6 +31,6 @@ export class LicenseTermController {
   @Post("attackPILTerms")
   // @UseInterceptors(CacheInterceptor)
   attackPILTerms(@Body() data: licenseTermsInput) {
-    return this.licenseTermSvc.attackPILTerms(data.ipId, data.termId, data.session);
+    return this.licenseTermSvc.attackPILTerms(data.ipId, data.termId, data.session, data.userWallet);
   }  
 }

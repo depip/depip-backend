@@ -36,7 +36,7 @@ export class SpgController {
     @UploadedFile() file: Express.Multer.File  
   ) {
 
-    return this.spgSvc.mintAndRegistryIp(data.name, data.description, data.recipient, data.session, file);
+    return this.spgSvc.mintAndRegistryIp(data.name, data.description, data.recipient, data.session, file, data.userWallet);
   }
   
 
