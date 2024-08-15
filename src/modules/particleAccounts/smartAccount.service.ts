@@ -1,10 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ENV_CONFIG } from '../../shared/services/config.service';
 import axios from 'axios';
-const chainId = 11155111; // Network
-const projectId = '0a851b67-3111-447c-be4a-f9efd85975e0';
-const projectServerKey = 'cIsfPnSBIDs5YB9RWVt7h91IC0zpckyBNtZTa04o';
-const nft1155ContractAddress = "0xC79b817AcA1395D2Ae45809E63AF338E6C2903F5";
 import { Wallet, Contract, ethers, Interface } from "ethers";
 const { Utils } = require("alchemy-sdk");
 
@@ -16,7 +12,7 @@ export class SmartAccountService implements OnModuleInit {
   private sessionSigner = new Wallet(ENV_CONFIG.MASTERWALLET, this.provider)
   // private mainSigner = Wallet.createRandom();
   private smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: this.mainSigner.address };
-
+  private auth = { username: ENV_CONFIG.PARTICAL_NETWORK.PROJECT_ID, password: ENV_CONFIG.PARTICAL_NETWORK.CLIENT_KEY };
 
   onModuleInit() {
   }
@@ -26,7 +22,7 @@ export class SmartAccountService implements OnModuleInit {
         'content-type': 'application/json',
       });
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_getSmartAccount',
@@ -36,10 +32,7 @@ export class SmartAccountService implements OnModuleInit {
         ],
       }, 
       {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
+          auth: this.auth,
       });
 
       console.log("smartAccount: " + JSON.stringify(response.data));
@@ -68,15 +61,12 @@ export class SmartAccountService implements OnModuleInit {
     const sessions = resCreateSessions.result.sessions; // the sessions you need to store locally
     userOpA.signature = await this.mainSigner.signMessage(Utils.arrayify(userOpHashA));
 
-    await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+    await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         method: "particle_aa_sendUserOp",
         params: [this.smartAccount, userOpA],
     }, 
     {
-        auth: {
-            username: projectId,
-            password: projectServerKey,
-        },
+      auth: this.auth,
     });
 
 
@@ -102,7 +92,7 @@ export class SmartAccountService implements OnModuleInit {
     // // const userOpHash = userOp.userOpHash;
     // // userOp.userOp.signature = await this.mainSigner.signMessage(Utils.arrayify(userOpHash));
     
-    // const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+    // const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
     //   method: "particle_aa_sendUserOp",
     //   params: [
     //     this.smartAccount, 
@@ -115,8 +105,8 @@ export class SmartAccountService implements OnModuleInit {
     // },
     //   {
     //     auth: {
-    //         username: projectId,
-    //         password: projectServerKey,
+    //         username: ENV_CONFIG.PARTICAL_NETWORK.PROJECT_ID,
+    //         password: ENV_CONFIG.PARTICAL_NETWORK.CLIENT_KEY,
     //     },
     // });
     // console.log("resSendUserOp: " + JSON.stringify(resSendUserOp.data));
@@ -133,7 +123,7 @@ export class SmartAccountService implements OnModuleInit {
       });
 
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_createUserOp',
@@ -163,10 +153,7 @@ export class SmartAccountService implements OnModuleInit {
           // "0x00000f7365cA6C59A2C93719ad53d567ed49c14C"                    
         ],
       }, {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
+        auth: this.auth,
       });
 
       console.log("createUserOp: " + JSON.stringify(response.data));
@@ -187,7 +174,7 @@ export class SmartAccountService implements OnModuleInit {
         const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
         userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
   
-        const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+        const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
           method: "particle_aa_sendUserOp",
           params: [
             smartAccount, 
@@ -199,10 +186,7 @@ export class SmartAccountService implements OnModuleInit {
           ],
         },
           {
-            auth: {
-                username: projectId,
-                password: projectServerKey,
-            },
+            auth: this.auth,
         });
         console.log("resSendUserOp: " + JSON.stringify(resSendUserOp.data));
         return resSendUserOp.data
@@ -218,7 +202,7 @@ export class SmartAccountService implements OnModuleInit {
 
   async sendUserOp(account, userOp, sessions) {
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_sendUserOp',
@@ -234,10 +218,7 @@ export class SmartAccountService implements OnModuleInit {
           }  
         ],
       }, {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
+          auth: this.auth,
       });
 
       // console.log(response);
@@ -250,7 +231,7 @@ export class SmartAccountService implements OnModuleInit {
 
   async getFeeQuotes(account, txs) {
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_getFeeQuotes',
@@ -262,11 +243,9 @@ export class SmartAccountService implements OnModuleInit {
             txs
           ]              
         ],
-      }, {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
+      }, 
+      {
+        auth: this.auth,
       });
       console.log("response.data: " + JSON.stringify(response.data))
       return response.data
@@ -282,7 +261,7 @@ export class SmartAccountService implements OnModuleInit {
       });
 
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_validateSession',
@@ -295,10 +274,7 @@ export class SmartAccountService implements OnModuleInit {
           }             
         ],
       }, {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
+        auth: this.auth,
       });
 
       console.log(response.data);
@@ -314,7 +290,7 @@ export class SmartAccountService implements OnModuleInit {
       });
 
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${chainId}`, {
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
         method: 'particle_aa_createSessions',
@@ -325,10 +301,7 @@ export class SmartAccountService implements OnModuleInit {
           session            
         ],
       }, {
-          auth: {
-              username: projectId,
-              password: projectServerKey,
-          },
+        auth: this.auth,
       });
 
       // console.log(response.data.result);

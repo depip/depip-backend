@@ -96,6 +96,9 @@ export class ConfigService {
       },   
       PARTICAL_NETWORK: {
         PARTICAL_RPC_URL: process.env.PARTICAL_RPC_URL || "https://rpc.particle.network/evm-chain?chainId=",
+        CHAIN_ID: process.env.CHAIN_ID,
+        PROJECT_ID: process.env.PROJECT_ID,
+        CLIENT_KEY: process.env.CLIENT_KEY,
       },       
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,

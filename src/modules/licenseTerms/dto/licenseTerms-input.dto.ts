@@ -26,4 +26,8 @@ export class licenseTermsInput {
   @Expose()
   @ApiProperty()
   session: any;    
+
+  @Expose()
+  @ApiProperty()
+  userWallet: string;  
 }
