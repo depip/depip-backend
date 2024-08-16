@@ -25,7 +25,7 @@ export class LicenseTermController {
   @Post("registerPILTerms")
   // @UseInterceptors(CacheInterceptor)
   registerPILTerms(@Body() data: licenseTermsInput) {
-    return this.licenseTermSvc.registerPILTerms(data.type, data.mintingFee, data.currency, data.session);
+    return this.licenseTermSvc.registerPILTerms(data.type, data.mintingFee, data.currency, data.session, data.commercialRevShare);
   }
 
   @Post("attackPILTerms")

@@ -40,6 +40,9 @@ export class IpassetService {
           throw new Error(errMsg);
         }
       }
+      // this._logger.log(`session: ` + JSON.stringify(session));
+      // this._logger.log(`userWallet: ` + userWallet);
+      
 
       const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
       if (isRegistered) {

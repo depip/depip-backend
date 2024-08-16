@@ -29,5 +29,9 @@ export class licenseTermsInput {
 
   @Expose()
   @ApiProperty()
+  commercialRevShare: number;
+
+  @Expose()
+  @ApiProperty()
   userWallet: string;  
 }
