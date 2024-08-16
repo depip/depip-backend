@@ -120,7 +120,7 @@ export class LicenseTermsService {
     }        
   }    
 
-  async registerPILTerms(pilType, mintingFee, currency, session) {
+  async registerPILTerms(pilType, mintingFee, currency, session, revShare) {
     this._logger.log(`perform registerPILTerms! `);
     try {
       // Connecting to smart contract
@@ -142,7 +142,7 @@ export class LicenseTermsService {
       const licenseTerms = getLicenseTermByType(pilType, {
         mintingFee: mintingFee,
         currency: currency,
-        commercialRevShare: 12,
+        commercialRevShare: revShare,
         royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
       });
       // const json = JSON.stringify(licenseTerms, 

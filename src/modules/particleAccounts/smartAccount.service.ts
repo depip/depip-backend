@@ -8,9 +8,8 @@ const { Utils } = require("alchemy-sdk");
 export class SmartAccountService implements OnModuleInit {
   private readonly logger = new Logger(SmartAccountService.name);
   private provider = new ethers.JsonRpcProvider(ENV_CONFIG.NODE.RPC);
-  private mainSigner = new Wallet("ad5f4007518e151531e410e9692345806ebfb12c2683de4f4345273d7c31fd89", this.provider);
   private sessionSigner = new Wallet(ENV_CONFIG.MASTERWALLET, this.provider)
-  // private mainSigner = Wallet.createRandom();
+  private mainSigner = Wallet.createRandom();
   private smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: this.mainSigner.address };
   private auth = { username: ENV_CONFIG.PARTICAL_NETWORK.PROJECT_ID, password: ENV_CONFIG.PARTICAL_NETWORK.CLIENT_KEY };
 
@@ -36,6 +35,7 @@ export class SmartAccountService implements OnModuleInit {
       });
 
       console.log("smartAccount: " + JSON.stringify(response.data));
+      console.log("sessionSigner: " + JSON.stringify(this.sessionSigner));
 
       let sessionsRaw: any[] = [
             {
@@ -167,29 +167,20 @@ export class SmartAccountService implements OnModuleInit {
   async signAndSendTx(account, txs, sessions) {
     try {
       const smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: account };
-      const resGetFeeQuotes = await this.getFeeQuotes(smartAccount, txs)
 
+      console.log("sessions: " + JSON.stringify(sessions));
+
+      const resGetFeeQuotes = await this.getFeeQuotes(smartAccount, txs)
+      
       if(!resGetFeeQuotes.error){
         const userOp = resGetFeeQuotes.result.verifyingPaymasterGasless.userOp;
         const userOpHash = resGetFeeQuotes.result.verifyingPaymasterGasless.userOpHash;
         userOp.signature = await this.sessionSigner.signMessage(Utils.arrayify(userOpHash));
   
-        const resSendUserOp = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
-          method: "particle_aa_sendUserOp",
-          params: [
-            smartAccount, 
-            userOp,        
-            {
-            sessions, // all sessions to generate proof
-            targetSession: sessions[0], // which session to use in this userOp
-            },
-          ],
-        },
-          {
-            auth: this.auth,
-        });
-        console.log("resSendUserOp: " + JSON.stringify(resSendUserOp.data));
-        return resSendUserOp.data
+        const resSendUserOp = await this.sendUserOp(smartAccount, userOp, sessions);
+
+        console.log("resSendUserOp: " + JSON.stringify(resSendUserOp));
+        return resSendUserOp
       } else {
         return resGetFeeQuotes
       }
@@ -202,24 +193,20 @@ export class SmartAccountService implements OnModuleInit {
 
   async sendUserOp(account, userOp, sessions) {
     try {
-      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
-        jsonrpc: "2.0",
-        id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
-        method: 'particle_aa_sendUserOp',
-        params: [
-          // account config
-          account,
-          // user op
-          userOp,
-          // // Optional
+        const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
+          method: "particle_aa_sendUserOp",
+          params: [
+            account, 
+            userOp,        
+            {
+            sessions, // all sessions to generate proof
+            targetSession: sessions[0], // which session to use in this userOp
+            },
+          ],
+        },
           {
-            sessions,
-            targetSession: sessions[0],
-          }  
-        ],
-      }, {
-          auth: this.auth,
-      });
+            auth: this.auth,
+        });
 
       // console.log(response);
       return response.data
