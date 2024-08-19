@@ -117,6 +117,31 @@ export class SmartAccountService implements OnModuleInit {
     }
   }
 
+
+  async getSmartAccount(owner: string) {
+    try {
+      const smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: owner };
+      const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
+        jsonrpc: "2.0",
+        id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
+        method: 'particle_aa_getSmartAccount',
+        params: [
+          // account config
+          smartAccount
+        ],
+      }, 
+      {
+          auth: this.auth,
+      });
+
+      return response.data
+
+    } catch (error) {
+      const errorMsg = `Error while call from particle! ${error}`;
+      throw new Error(errorMsg);
+    }
+  }  
+
   async createUserOp(account, txs) {
     const headers = ({
         'content-type': 'application/json',

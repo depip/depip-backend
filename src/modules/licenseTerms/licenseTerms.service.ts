@@ -10,10 +10,12 @@ import LicenseRegistryABI from '../../web3/ABI/LicenseRegistry.json'
 import LicenseModuleABI from '../../web3/ABI/LicenseModule.json'
 import * as fs from 'fs';
 import path from 'path';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 
 const  licenseTemplateABIPath = "../../web3/ABI/LicenseTemplate.json"
 const  licenseRegistryABIPath = "../../web3/ABI/LicenseRegistry.json"
 const  licenseModuleABIPath = "../../web3/ABI/LicenseModule.json"
+import { SPGService } from '../spg/spg.service';
 
 @Injectable()
 export class LicenseTermsService {
@@ -29,7 +31,9 @@ export class LicenseTermsService {
   private licenseModuleContract = null;
 
   constructor(
-    private commonUtil: CommonUtil
+    private commonUtil: CommonUtil,
+    private smartAccountService: SmartAccountService,
+    private spgService: SPGService,
   ) {}  
 
   // async registerLicenseTerms(ipId: string, type: PIL_TYPE, mintingFee: number, currency: string) {
@@ -94,19 +98,41 @@ export class LicenseTermsService {
             this._logger.error(errMsg);
             throw new Error(errMsg);
           }
-        }       
-        // Attack PIL terms
-        const txHash = await this.licenseModuleContract.attachLicenseTerms(ipId, this.licenseTemplateAddr, termId);
-        const res = await txHash.wait();
-        if (res.status !== 1) {
-          alert('error message');
-          return "Register fail: " + res.hash
+        }   
+
+        const smartAccount = await this.smartAccountService.getSmartAccount(userWallet);
+        console.log("smartAccount: " + JSON.stringify(smartAccount));
+        await this.spgService.setPermission(ipId, smartAccount.result.smartAccountAddress, 1, userWallet, session);
+        
+        const txRaw = await this.licenseModuleContract.attachLicenseTerms.populateTransaction(ipId, this.licenseTemplateAddr, termId);
+        const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
+        
+        if (txSigned.error) {
+          // alert('error message');
+          return {
+            status: "fail",
+            error: txSigned.error.data.extraMessage
+          }
+  
         }else{
           return {
             status: "success",
-            tx: res.hash,
+            tx: txSigned.result,
           }
-        }      
+        }        
+
+        // Attack PIL terms
+        // const txHash = await this.licenseModuleContract.attachLicenseTerms(ipId, this.licenseTemplateAddr, termId);
+        // const res = await txHash.wait();
+        // if (res.status !== 1) {
+        //   alert('error message');
+        //   return "Register fail: " + res.hash
+        // }else{
+        //   return {
+        //     status: "success",
+        //     tx: res.hash,
+        //   }
+        // }      
       }
     } catch (error) {
       this._logger.log(
@@ -120,7 +146,7 @@ export class LicenseTermsService {
     }        
   }    
 
-  async registerPILTerms(pilType, mintingFee, currency, session, revShare) {
+  async registerPILTerms(pilType, mintingFee, currency, session, revShare, userWallet) {
     this._logger.log(`perform registerPILTerms! `);
     try {
       // Connecting to smart contract
@@ -159,20 +185,40 @@ export class LicenseTermsService {
         }
       }
       // Register PIL terms
-      const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
-      const res = await txHash.wait();
-      if (res.status !== 1) {
+
+      const txRaw = await this.licenseModuleContract.attachLicenseTerms.populateTransaction(licenseTerms);
+      const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
+      
+      if (txSigned.error) {
+        // alert('error message');
         return {
           status: "fail",
-          error: res.hash,
+          error: txSigned.error.data.extraMessage
         }
+
       }else{
-        const licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
         return {
           status: "success",
-          termId: Number(licenseTermsIdNew),
-        }        
-      }
+          tx: txSigned.result,
+        }
+      } 
+
+      // const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
+      // const res = await txHash.wait();
+      // if (res.status !== 1) {
+      //   return {
+      //     status: "fail",
+      //     error: res.hash,
+      //   }
+      // }else{
+      //   const licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
+      //   return {
+      //     status: "success",
+      //     termId: Number(licenseTermsIdNew),
+      //   }        
+      // }
+
+
     } catch (error) {
       this._logger.log(
         `error when register PIL Terms`,

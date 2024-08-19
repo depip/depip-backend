@@ -5,13 +5,16 @@ import { IPFSService } from '../files/ipfs.service';
 import { IMetadata } from './interfaces/metadata';
 import SpgABI from '../../web3/ABI/SPG.json'
 import NftABI from '../../web3/ABI/NFT.json'
+import AccessControllerABI from '../../web3/ABI/AccessController.json'
 import { parseTokenId } from '../../web3';
 import { IpassetService } from '../ipasset/ipasset.service';
+import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 import * as fs from 'fs';
 import path from 'path';
 
 const  SPGABIPath = "../../web3/ABI/SPG.json"
 const  NFTABIPath = "../../web3/ABI/NFT.json"
+const  AccessControllerABIPath = "../../web3/ABI/AccessController.json"
 
 @Injectable()
 export class SPGService {
@@ -22,11 +25,15 @@ export class SPGService {
   private NFTAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.NFT;
   private NFTContract = null;
   private NFTAbi = [];  
+  private AccessControllerAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ACCESSCONTROLLER_ADDRESS;
+  private AccessControllerContract = null;
+  private AccessControllerAbi = []; 
 
   constructor(
     private commonUtil: CommonUtil,
     private ipfsService: IPFSService,
     private ipassetService: IpassetService,
+    private smartAccountService: SmartAccountService,
   ) {}    
 
   async mintAndRegistryIp(name: string, description: string, recipient: string, session, image: Express.Multer.File, userWallet: string) {
@@ -118,4 +125,52 @@ export class SPGService {
       }
     }       
   }
+
+  async setPermission(ipAccount: string, signer: string, permission: number, userWallet: string, session) {
+    this._logger.log(`perform setPermission! `);
+    try {
+      // Connecting to smart contract
+      if (!this.AccessControllerContract) {
+        if (this.AccessControllerAbi.length == 0) {
+          const abiFilePath = path.resolve(__dirname, AccessControllerABIPath);
+          const files = fs.readFileSync(abiFilePath);
+          this.AccessControllerAbi = JSON.parse(files.toString());
+        }
+
+        this.AccessControllerContract = await this.commonUtil.getContract(this.AccessControllerAddr, this.AccessControllerAbi);
+        if (!this.AccessControllerContract) {
+          const errMsg = `can not get AccessControllerContract`;
+          this._logger.error(errMsg);
+          throw new Error(errMsg);
+        }
+      }  
+      
+      const txRaw = await this.AccessControllerContract.setAllPermissions.populateTransaction(ipAccount, signer, permission);
+      const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
+      
+      if (txSigned.error) {
+        // alert('error message');
+        return {
+          status: "fail",
+          error: txSigned.error.data.extraMessage
+        }
+
+      }else{
+        return {
+          status: "success",
+          tx: txSigned.result,
+        }
+      }        
+
+    } catch (error) {
+      this._logger.log(
+        `error when setPermission :${ipAccount}`,
+        error.stack,
+      );
+      return {
+        status: "fail",
+        error: error,
+      }
+    }       
+  }  
 }

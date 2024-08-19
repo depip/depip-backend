@@ -51,24 +51,50 @@ export class LicenseService {
 
       // Mint License  
       this._logger.log(`perform to call contract! `);
-      const tx = await this.licenseModuleContract.mintLicenseTokens(
-        licensorIpId,
-        this.licenseTemplateAddr,
-        licenseTermsId,
-        amount,
-        receiver,
-        "0x0000000000000000000000000000000000000000"
-      );
-      const res = await tx.wait();
-      if (res.status !== 1) {
-        alert('error message');
-        return "Mint license fail: " + res.hash
+
+      const txRaw = await this.licenseModuleContract.attachLicenseTerms.populateTransaction(
+          licensorIpId,
+          this.licenseTemplateAddr,
+          licenseTermsId,
+          amount,
+          receiver,
+          "0x0000000000000000000000000000000000000000"
+        );
+      const txSigned = await this.licenseModuleContract.signAndSendTx(userWallet, txRaw, session)   
+      
+      if (txSigned.error) {
+        // alert('error message');
+        return {
+          status: "fail",
+          error: txSigned.error.data.extraMessage
+        }
+
       }else{
         return {
           status: "success",
-          tx: res.hash,
+          tx: txSigned.result,
         }
-      }
+      } 
+
+      // const tx = await this.licenseModuleContract.mintLicenseTokens(
+      //   licensorIpId,
+      //   this.licenseTemplateAddr,
+      //   licenseTermsId,
+      //   amount,
+      //   receiver,
+      //   "0x0000000000000000000000000000000000000000"
+      // );
+      // const res = await tx.wait();
+      // if (res.status !== 1) {
+      //   alert('error message');
+      //   return "Mint license fail: " + res.hash
+      // }else{
+      //   return {
+      //     status: "success",
+      //     tx: res.hash,
+      //   }
+      // }
+
     } catch (error) {
       this._logger.log(
         `error when mint license: ${licensorIpId}`,
