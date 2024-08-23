@@ -63,7 +63,7 @@ export function getLicenseTermByType(
     licenseTerms.commercialUse = true;
     licenseTerms.commercialAttribution = true;
 
-    licenseTerms.commercialRevShare = (term.commercialRevShare / 100) * 100000000;
+    licenseTerms.commercialRevShare = Math.round(term.commercialRevShare / 100) * 100000000;
     licenseTerms.derivativesReciprocal = true;
     licenseTerms.currency = term.currency;
     return licenseTerms;

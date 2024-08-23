@@ -9,25 +9,16 @@ import AccessControllerABI from '../../web3/ABI/AccessController.json'
 import { parseTokenId } from '../../web3';
 import { IpassetService } from '../ipasset/ipasset.service';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
-import * as fs from 'fs';
-import path from 'path';
-
-const  SPGABIPath = "../../web3/ABI/SPG.json"
-const  NFTABIPath = "../../web3/ABI/NFT.json"
-const  AccessControllerABIPath = "../../web3/ABI/AccessController.json"
 
 @Injectable()
 export class SPGService {
   private readonly _logger = new Logger(SPGService.name);
   private SPGAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.SPG;
   private SPGContract = null;
-  private SPGAbi = [];
   private NFTAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.NFT;
   private NFTContract = null;
-  private NFTAbi = [];  
   private AccessControllerAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ACCESSCONTROLLER_ADDRESS;
   private AccessControllerContract = null;
-  private AccessControllerAbi = []; 
 
   constructor(
     private commonUtil: CommonUtil,
@@ -40,29 +31,23 @@ export class SPGService {
     this._logger.log(`perform mint a nft! `);
     try {
       // Connecting to smart contract
-      if (!this.SPGContract) {
-        if (this.SPGAbi.length == 0) {
-          const abiFilePath = path.resolve(__dirname, SPGABIPath);
-          const files = fs.readFileSync(abiFilePath);
-          this.SPGAbi = JSON.parse(files.toString());
-        }
+      // if (!this.SPGContract) {
+      //   if (this.SPGAbi.length == 0) {
+      //     const abiFilePath = path.resolve(__dirname, SPGABIPath);
+      //     const files = fs.readFileSync(abiFilePath);
+      //     this.SPGAbi = JSON.parse(files.toString());
+      //   }
 
-        this.SPGContract = await this.commonUtil.getContract(this.SPGAddr, this.SPGAbi);
-        if (!this.SPGContract) {
-          const errMsg = `can not get SPGContract`;
-          this._logger.error(errMsg);
-          throw new Error(errMsg);
-        }
-      }
+      //   this.SPGContract = await this.commonUtil.getContract(this.SPGAddr, SpgABI);
+      //   if (!this.SPGContract) {
+      //     const errMsg = `can not get SPGContract`;
+      //     this._logger.error(errMsg);
+      //     throw new Error(errMsg);
+      //   }
+      // }
 
       if (!this.NFTContract) {
-        if (this.NFTAbi.length == 0) {
-          const abiFilePath = path.resolve(__dirname, NFTABIPath);
-          const files = fs.readFileSync(abiFilePath);
-          this.NFTAbi = JSON.parse(files.toString());
-        }
-
-        this.NFTContract = await this.commonUtil.getContract(this.NFTAddr, this.NFTAbi);
+        this.NFTContract = await this.commonUtil.getContract(this.NFTAddr, NftABI);
         if (!this.NFTContract) {
           const errMsg = `can not get NFTContract`;
           this._logger.error(errMsg);
@@ -131,13 +116,7 @@ export class SPGService {
     try {
       // Connecting to smart contract
       if (!this.AccessControllerContract) {
-        if (this.AccessControllerAbi.length == 0) {
-          const abiFilePath = path.resolve(__dirname, AccessControllerABIPath);
-          const files = fs.readFileSync(abiFilePath);
-          this.AccessControllerAbi = JSON.parse(files.toString());
-        }
-
-        this.AccessControllerContract = await this.commonUtil.getContract(this.AccessControllerAddr, this.AccessControllerAbi);
+        this.AccessControllerContract = await this.commonUtil.getContract(this.AccessControllerAddr, AccessControllerABI);
         if (!this.AccessControllerContract) {
           const errMsg = `can not get AccessControllerContract`;
           this._logger.error(errMsg);
