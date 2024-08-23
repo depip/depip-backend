@@ -1,21 +1,14 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { findLast } from 'lodash';
 import { ENV_CONFIG } from '../../shared/services/config.service';
 import { IpassetService } from '../ipasset/ipasset.service';
 import { CommonUtil } from '../../utils/common.util';
 import LicenseModuleABI from '../../web3/ABI/LicenseModule.json'
-import { PIL_TYPE } from '../../shared/types/license-type';
-import * as fs from 'fs';
-import path from 'path';
-
-const  licenseModuleABIPath = "../../web3/ABI/LicenseModule.json"
 
 @Injectable()
 export class LicenseService {
   private readonly _logger = new Logger(LicenseService.name);
   private licenseModuleAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE_MODULE;
   private licenseTemplateAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE_TEMPLATE;
-  private licenseModuleAbi = [];
   private licenseModuleContract = null;
 
   constructor(
@@ -36,12 +29,7 @@ export class LicenseService {
 
       // Connecting to smart contract
       if (!this.licenseModuleContract) {
-        if (this.licenseModuleAbi.length == 0) {
-          const abiFilePath = path.resolve(__dirname, licenseModuleABIPath);
-          const files = fs.readFileSync(abiFilePath);
-          this.licenseModuleAbi = JSON.parse(files.toString());
-        }
-        this.licenseModuleContract = await this.commonUtil.getContract(this.licenseModuleAddr, this.licenseModuleAbi);
+        this.licenseModuleContract = await this.commonUtil.getContract(this.licenseModuleAddr, LicenseModuleABI);
         if (!this.licenseModuleContract) {
           const errMsg = `can not get contract licenseModuleContract`;
           this._logger.error(errMsg);
@@ -51,24 +39,50 @@ export class LicenseService {
 
       // Mint License  
       this._logger.log(`perform to call contract! `);
-      const tx = await this.licenseModuleContract.mintLicenseTokens(
-        licensorIpId,
-        this.licenseTemplateAddr,
-        licenseTermsId,
-        amount,
-        receiver,
-        "0x0000000000000000000000000000000000000000"
-      );
-      const res = await tx.wait();
-      if (res.status !== 1) {
-        alert('error message');
-        return "Mint license fail: " + res.hash
+
+      const txRaw = await this.licenseModuleContract.attachLicenseTerms.populateTransaction(
+          licensorIpId,
+          this.licenseTemplateAddr,
+          licenseTermsId,
+          amount,
+          receiver,
+          "0x0000000000000000000000000000000000000000"
+        );
+      const txSigned = await this.licenseModuleContract.signAndSendTx(userWallet, txRaw, session)   
+      
+      if (txSigned.error) {
+        // alert('error message');
+        return {
+          status: "fail",
+          error: txSigned.error.data.extraMessage
+        }
+
       }else{
         return {
           status: "success",
-          tx: res.hash,
+          tx: txSigned.result,
         }
-      }
+      } 
+
+      // const tx = await this.licenseModuleContract.mintLicenseTokens(
+      //   licensorIpId,
+      //   this.licenseTemplateAddr,
+      //   licenseTermsId,
+      //   amount,
+      //   receiver,
+      //   "0x0000000000000000000000000000000000000000"
+      // );
+      // const res = await tx.wait();
+      // if (res.status !== 1) {
+      //   alert('error message');
+      //   return "Mint license fail: " + res.hash
+      // }else{
+      //   return {
+      //     status: "success",
+      //     tx: res.hash,
+      //   }
+      // }
+
     } catch (error) {
       this._logger.log(
         `error when mint license: ${licensorIpId}`,

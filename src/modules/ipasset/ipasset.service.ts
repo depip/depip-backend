@@ -1,5 +1,4 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { findLast } from 'lodash';
 import { ENV_CONFIG } from '../../shared/services/config.service';
 import {
   Contract,
