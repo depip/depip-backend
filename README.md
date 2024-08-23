@@ -1,6 +1,18 @@
-# Decentralized Programmable Intellectual Property (Depip)
-
-Depip agent is an AI agent who can help you answer questions about Programable IP License from [Story Protocol](https://docs.storyprotocol.xyz/docs/what-is-story-protocol), help you create an IP license, register NFT as IP... with no coding. Just ask the agent.
+# Depip backend
+Depip backend is backend of Depip project. Currently, it has some modules below:
+- AI agent service
+    - answer question about story protocol
+    - help user interacting with story protocol:
+        - create IP asset
+        - create PIL term
+        - attach PIL term to IP asset   
+        - mint license token
+- Sync service  
+    - ip asset
+    - license
+    - dispute
+    - derivative
+- Particle smart account
 
 ## Overview architecture
 This backend has 2 part: api and sync service. API is connected to AWS bedrock agent service, and sync currently sync IP asset from Story Protocol on Sepolia testnet.
