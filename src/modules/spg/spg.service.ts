@@ -9,6 +9,14 @@ import AccessControllerABI from '../../web3/ABI/AccessController.json'
 import { parseTokenId } from '../../web3';
 import { IpassetService } from '../ipasset/ipasset.service';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
+import {
+  Contract,
+  JsonRpcProvider,
+  Wallet,
+  formatEther,
+  parseEther,
+  parseUnits,
+} from 'ethers';
 
 @Injectable()
 export class SPGService {
@@ -19,6 +27,7 @@ export class SPGService {
   private NFTContract = null;
   private AccessControllerAddr: string = ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ACCESSCONTROLLER_ADDRESS;
   private AccessControllerContract = null;
+  private provider = new JsonRpcProvider(ENV_CONFIG.NODE.RPC);
 
   constructor(
     private commonUtil: CommonUtil,
@@ -106,7 +115,7 @@ export class SPGService {
       );
       return {
         status: "fail",
-        error: error,
+        error: error.message,
       }
     }       
   }
@@ -149,7 +158,29 @@ export class SPGService {
       return {
         status: "fail",
         error: error,
-      }
+      } 
     }       
   }  
+
+  async transferToken(sender: string, receiver: string, amount: string, token: string) {
+    this._logger.log(`perform transfer token! `);
+    try {
+      const signer = new Wallet(sender, this.provider);
+
+      const tx = await signer.sendTransaction({
+        to: receiver,
+        value: parseUnits(amount, 'ether'),
+      });      
+      
+    } catch (error) {
+      this._logger.log(
+        `error when transfer token to:${receiver}`,
+        error.stack,
+      );
+      return {
+        status: "fail",
+        error: error,
+      }
+    }       
+  }    
 }

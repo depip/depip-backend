@@ -219,7 +219,7 @@ export class IpassetService {
         `error when call contract :${this.ipassetContractAddr}`,
         error.stack,
       );
-      throw error;
+      throw error.message;
     }    
   }  
 

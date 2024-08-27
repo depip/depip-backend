@@ -100,6 +100,7 @@ export class ConfigService {
         CHAIN_ID: process.env.CHAIN_ID,
         PROJECT_ID: process.env.PROJECT_ID,
         CLIENT_KEY: process.env.CLIENT_KEY,
+        CUSTOMVALIDATIONSESSION: process.env.CUSTOMVALIDATIONSESSION,
       },       
       CHAIN_INFO: {
         COIN_DENOM: process.env.COIN_DENOM,
