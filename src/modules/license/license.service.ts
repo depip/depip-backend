@@ -90,7 +90,7 @@ export class LicenseService {
       );
       return {
         status: "fail",
-        error: error,
+        error: error.message,
       }
     }        
   }

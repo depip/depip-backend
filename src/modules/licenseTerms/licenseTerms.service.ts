@@ -212,11 +212,12 @@ export class LicenseTermsService {
     } catch (error) {
       this._logger.log(
         `error when register PIL Terms`,
-        error.stack,
+        error,
       );
+     
       return {
         status: "fail",
-        error: error,
+        error: error.message,
       }
     }        
   }   

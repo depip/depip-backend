@@ -41,7 +41,7 @@ export class SmartAccountService implements OnModuleInit {
             {
                 "validUntil": 0,
                 "validAfter": 0,
-                "sessionValidationModule": "0xB4AFbE412FD10cF1BFd57c5dcccdbE391352CF1b",
+                "sessionValidationModule": "0xce1056bA490f0Fd77338f6b8940F45D018701A60",
                 "sessionKeyDataInAbi": [ // or use sessionKeyData to replace
                     ["address", "address", "uint256"],
                     [
@@ -193,7 +193,7 @@ export class SmartAccountService implements OnModuleInit {
     try {
       const smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: account };
 
-      console.log("sessions: " + JSON.stringify(sessions));
+      console.log("txs: " + JSON.stringify(txs));
 
       const resGetFeeQuotes = await this.getFeeQuotes(smartAccount, txs)
       
