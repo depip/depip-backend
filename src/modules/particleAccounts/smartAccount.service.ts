@@ -10,7 +10,7 @@ export class SmartAccountService implements OnModuleInit {
   private provider = new ethers.JsonRpcProvider(ENV_CONFIG.NODE.RPC);
   private sessionSigner = new Wallet(ENV_CONFIG.MASTERWALLET, this.provider)
   private mainSigner = Wallet.createRandom();
-  private smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: this.mainSigner.address };
+  private smartAccount = { name: "SIMPLE", version: "2.0.0", ownerAddress: this.mainSigner.address };
   private auth = { username: ENV_CONFIG.PARTICAL_NETWORK.PROJECT_ID, password: ENV_CONFIG.PARTICAL_NETWORK.CLIENT_KEY };
 
   onModuleInit() {
@@ -120,7 +120,7 @@ export class SmartAccountService implements OnModuleInit {
 
   async getSmartAccount(owner: string) {
     try {
-      const smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: owner };
+      const smartAccount = { name: "SIMPLE", version: "2.0.0", ownerAddress: owner };
       const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
@@ -191,7 +191,7 @@ export class SmartAccountService implements OnModuleInit {
 
   async signAndSendTx(account, txs, sessions) {
     try {
-      const smartAccount = { name: "BICONOMY", version: "2.0.0", ownerAddress: account };
+      const smartAccount = { name: "SIMPLE", version: "2.0.0", ownerAddress: account };
 
       console.log("txs: " + JSON.stringify(txs));
 
