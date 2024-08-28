@@ -8,7 +8,7 @@ export function getLicenseTermByType(
   term?: {
     mintingFee?: string | number | bigint;
     currency?: string;
-    royaltyPolicyLAPAddress: string;
+    royaltyPolicyLAPAddress?: string;
     commercialRevShare?: number;
   },
 ): LicenseTerms {
@@ -34,6 +34,7 @@ export function getLicenseTermByType(
   if (type === PIL_TYPE.NON_COMMERCIAL_REMIX) {
     return licenseTerms;
   } else if (type === PIL_TYPE.COMMERCIAL_USE) {
+    console.log(`term: ` + JSON.stringify(term));
     if (!term || term.mintingFee === undefined || term.currency === undefined) {
       throw new Error("mintingFee currency are required for commercial use PIL.");
     }

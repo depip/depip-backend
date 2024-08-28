@@ -9,7 +9,7 @@ export class SmartAccountService implements OnModuleInit {
   private readonly logger = new Logger(SmartAccountService.name);
   private provider = new ethers.JsonRpcProvider(ENV_CONFIG.NODE.RPC);
   private sessionSigner = new Wallet(ENV_CONFIG.MASTERWALLET, this.provider)
-  private mainSigner = Wallet.createRandom();
+  private mainSigner = new Wallet("0x090bccb9b637f34df32c5aee485f8a1ee817807bcc6b16e2124a7bf71025f5d5", this.provider)
   private smartAccount = { name: "SIMPLE", version: "2.0.0", ownerAddress: this.mainSigner.address };
   private auth = { username: ENV_CONFIG.PARTICAL_NETWORK.PROJECT_ID, password: ENV_CONFIG.PARTICAL_NETWORK.CLIENT_KEY };
 
@@ -54,7 +54,7 @@ export class SmartAccountService implements OnModuleInit {
           ]; 
 
     const resCreateSessions = await this.createSessions(this.smartAccount, sessionsRaw)
-
+    console.log("resCreateSessions: " + JSON.stringify(resCreateSessions));
           // we use gasless mode
     const userOpA = resCreateSessions.result.verifyingPaymasterGasless.userOp;
     const userOpHashA = resCreateSessions.result.verifyingPaymasterGasless.userOpHash;
@@ -120,7 +120,7 @@ export class SmartAccountService implements OnModuleInit {
 
   async getSmartAccount(owner: string) {
     try {
-      const smartAccount = { name: "SIMPLE", version: "2.0.0", ownerAddress: owner };
+      const smartAccount = { name: "SIMPLE", version: "1.0.0", ownerAddress: owner };
       const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
@@ -303,9 +303,9 @@ export class SmartAccountService implements OnModuleInit {
 
     try {
       const response = await axios.post(`${ENV_CONFIG.PARTICAL_NETWORK.PARTICAL_RPC_URL}${ENV_CONFIG.PARTICAL_NETWORK.CHAIN_ID}`, {
+        method: 'particle_aa_createSessions',
         jsonrpc: "2.0",
         id: "ee9cce2a-2f34-4c66-879e-c84c6f0e7f2d",
-        method: 'particle_aa_createSessions',
         params: [
           // account config
           account,

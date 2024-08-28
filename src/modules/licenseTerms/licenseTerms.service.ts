@@ -7,6 +7,7 @@ import LicenseRegistryABI from '../../web3/ABI/LicenseRegistry.json'
 import LicenseModuleABI from '../../web3/ABI/LicenseModule.json'
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 import { SPGService } from '../spg/spg.service';
+import { PIL_TYPE, LicenseTerms } from "../../shared/types/license-type";
 
 @Injectable()
 export class LicenseTermsService {
@@ -90,35 +91,35 @@ export class LicenseTermsService {
         // console.log("smartAccount: " + JSON.stringify(smartAccount));
         // await this.spgService.setPermission(ipId, smartAccount.result.smartAccountAddress, 1, userWallet, session);
         
-        const txRaw = await this.licenseModuleContract.attachLicenseTerms.populateTransaction(ipId, this.licenseTemplateAddr, termId);
-        const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
+        // const txRaw = await this.licenseModuleContract.attachLicenseTerms.populateTransaction(ipId, this.licenseTemplateAddr, termId);
+        // const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
         
-        if (txSigned.error) {
-          // alert('error message');
-          return {
-            status: "fail",
-            error: txSigned.error.data.extraMessage
-          }
+        // if (txSigned.error) {
+        //   // alert('error message');
+        //   return {
+        //     status: "fail",
+        //     error: txSigned.error.data.extraMessage
+        //   }
   
-        }else{
-          return {
-            status: "success",
-            tx: txSigned.result,
-          }
-        }        
-
-        // Attack PIL terms
-        // const txHash = await this.licenseModuleContract.attachLicenseTerms(ipId, this.licenseTemplateAddr, termId);
-        // const res = await txHash.wait();
-        // if (res.status !== 1) {
-        //   alert('error message');
-        //   return "Register fail: " + res.hash
         // }else{
         //   return {
         //     status: "success",
-        //     tx: res.hash,
+        //     tx: txSigned.result,
         //   }
-        // }      
+        // }        
+
+        // Attack PIL terms
+        const txHash = await this.licenseModuleContract.attachLicenseTerms(ipId, this.licenseTemplateAddr, termId);
+        const res = await txHash.wait();
+        if (res.status !== 1) {
+          alert('error message');
+          return "Register fail: " + res.hash
+        }else{
+          return {
+            status: "success",
+            tx: res.hash,
+          }
+        }      
       }
     } catch (error) {
       this._logger.log(
@@ -132,7 +133,7 @@ export class LicenseTermsService {
     }        
   }    
 
-  async registerPILTerms(pilType, mintingFee, currency, session, revShare, userWallet) {
+  async registerPILTerms(pilType: number, mintingFee: number, currency, session, revShare, userWallet) {
     this._logger.log(`perform registerPILTerms! `);
     try {
       // Connecting to smart contract
@@ -145,15 +146,31 @@ export class LicenseTermsService {
         }
       }
 
-      const licenseTerms = getLicenseTermByType(pilType, {
-        mintingFee: mintingFee,
-        currency: currency,
-        commercialRevShare: Number(revShare),
-        royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
-      });
-
       this._logger.log(`revShare: ` + revShare);
       this._logger.log(`mintingFee: ` + mintingFee);
+      this._logger.log(`currency: ` + currency);
+      this._logger.log(`Number(pilType): ` + Number(pilType));
+
+      let licenseTerms
+      if(pilType == PIL_TYPE.COMMERCIAL_USE){
+        licenseTerms = getLicenseTermByType(Number(pilType), {
+          mintingFee: mintingFee,
+          currency: currency,
+          royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
+        });
+      } else if(pilType == PIL_TYPE.COMMERCIAL_REMIX){
+        licenseTerms = getLicenseTermByType(Number(pilType), {
+          mintingFee: mintingFee,
+          currency: currency,
+          commercialRevShare: Number(revShare),
+          royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
+        });
+      } else{
+        licenseTerms = getLicenseTermByType(Number(pilType), {
+          royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
+        });        
+      }
+
       // const json = JSON.stringify(licenseTerms, 
       //   (k, v) => typeof v === 'bigint' ? 'BIGINT_' + v : v
       // ).replace(/"BIGINT_(\d+)"/g, '$1');
@@ -169,44 +186,44 @@ export class LicenseTermsService {
       }
       // Register PIL terms
 
-      const txRaw = await this.licenseTemplateContract.registerLicenseTerms.populateTransaction(licenseTerms);
-      const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
+      // const txRaw = await this.licenseTemplateContract.registerLicenseTerms.populateTransaction(licenseTerms);
+      // const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)   
       
-      if (txSigned.error) {
-        // alert('error message');
-        return {
-          status: "fail",
-          error: txSigned.error.data.extraMessage
-        }
-
-      }else{
-        await this.sleep(15000)
-        let licenseTermsIdNew = 0
-        do {
-          licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
-        } while (licenseTermsIdNew == 0);
-
-        return {
-          status: "success",
-          tx: txSigned.result,
-          termId: Number(licenseTermsIdNew),
-        }
-      } 
-
-      // const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
-      // const res = await txHash.wait();
-      // if (res.status !== 1) {
+      // if (txSigned.error) {
+      //   // alert('error message');
       //   return {
       //     status: "fail",
-      //     error: res.hash,
+      //     error: txSigned.error.data.extraMessage
       //   }
+
       // }else{
-      //   const licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
+      //   await this.sleep(15000)
+      //   let licenseTermsIdNew = 0
+      //   do {
+      //     licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
+      //   } while (licenseTermsIdNew == 0);
+
       //   return {
       //     status: "success",
+      //     tx: txSigned.result,
       //     termId: Number(licenseTermsIdNew),
-      //   }        
-      // }
+      //   }
+      // } 
+
+      const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
+      const res = await txHash.wait();
+      if (res.status !== 1) {
+        return {
+          status: "fail",
+          error: res.hash,
+        }
+      }else{
+        const licenseTermsIdNew = await this.licenseTemplateContract.getLicenseTermsId(licenseTerms);
+        return {
+          status: "success",
+          termId: Number(licenseTermsIdNew),
+        }        
+      }
 
 
     } catch (error) {
