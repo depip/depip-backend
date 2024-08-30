@@ -146,11 +146,6 @@ export class LicenseTermsService {
         }
       }
 
-      this._logger.log(`revShare: ` + revShare);
-      this._logger.log(`mintingFee: ` + mintingFee);
-      this._logger.log(`currency: ` + currency);
-      this._logger.log(`Number(pilType): ` + Number(pilType));
-
       let licenseTerms
       if(pilType == PIL_TYPE.COMMERCIAL_USE){
         licenseTerms = getLicenseTermByType(Number(pilType), {
@@ -211,8 +206,8 @@ export class LicenseTermsService {
       // } 
       // const gasLimit = await this.licenseTemplateContract.estimateGas.registerLicenseTerms(licenseTerms);
       // this._logger.log(`gasLimit: ` + gasLimit);
-      const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms, {gasLimit: 1600000, gasPrice: 12000
-     });
+      const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
+      // this._logger.log(`txHash: ` + txHash);
       const res = await txHash.wait();
       if (res.status !== 1) {
         return {
