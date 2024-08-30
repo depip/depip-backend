@@ -78,7 +78,8 @@ export class LicenseService {
         this.licenseTemplateAddr,
         licenseTermsId,
         amount,
-        receiver);
+        receiver,
+        "0x0000000000000000000000000000000000000000");
       const res = await tx.wait();
       if (res.status !== 1) {
         alert('error message');
