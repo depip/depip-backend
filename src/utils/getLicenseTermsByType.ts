@@ -34,7 +34,7 @@ export function getLicenseTermByType(
   if (type === PIL_TYPE.NON_COMMERCIAL_REMIX) {
     return licenseTerms;
   } else if (type === PIL_TYPE.COMMERCIAL_USE) {
-    console.log(`term: ` + JSON.stringify(term));
+    
     if (!term || term.mintingFee === undefined || term.currency === undefined) {
       throw new Error("mintingFee currency are required for commercial use PIL.");
     }
@@ -63,8 +63,7 @@ export function getLicenseTermByType(
     licenseTerms.mintingFee = BigInt(term.mintingFee);
     licenseTerms.commercialUse = true;
     licenseTerms.commercialAttribution = true;
-
-    licenseTerms.commercialRevShare = Math.round(term.commercialRevShare / 100) * 100000000;
+    licenseTerms.commercialRevShare = Math.round((term.commercialRevShare / 100) * 100000000);
     licenseTerms.derivativesReciprocal = true;
     licenseTerms.currency = term.currency;
     return licenseTerms;

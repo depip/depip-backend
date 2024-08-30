@@ -53,6 +53,7 @@ export class LicenseTermsService {
 
   async attackPILTerms(ipId, termId, session, userWallet) {
     try {
+      this._logger.log(`perform attackPILTerms! `);
       // Connecting to smart contract
       if (!this.licenseRegistryContract) {
         // if (this.licenseRegistryAbi.length == 0) {
@@ -165,7 +166,8 @@ export class LicenseTermsService {
           royaltyPolicyLAPAddress: "0x0000000000000000000000000000000000000000",
         });        
       }
-
+      // this._logger.log(`revShare: ` + revShare);
+      // // this._logger.log(`licenseTerms: ` + JSON.stringify(licenseTerms));
       // const json = JSON.stringify(licenseTerms, 
       //   (k, v) => typeof v === 'bigint' ? 'BIGINT_' + v : v
       // ).replace(/"BIGINT_(\d+)"/g, '$1');
