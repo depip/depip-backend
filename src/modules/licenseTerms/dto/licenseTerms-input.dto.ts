@@ -13,7 +13,7 @@ export class licenseTermsInput {
 
   @Expose()
   @ApiProperty()
-  mintingFee: number;
+  mintingFee: string;
 
   @Expose()
   @ApiProperty()

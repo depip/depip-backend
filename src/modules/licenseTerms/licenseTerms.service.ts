@@ -134,7 +134,7 @@ export class LicenseTermsService {
     }        
   }    
 
-  async registerPILTerms(pilType: number, mintingFee: number, currency, session, revShare, userWallet) {
+  async registerPILTerms(pilType: number, mintingFee: string, currency, session, revShare, userWallet) {
     this._logger.log(`perform registerPILTerms! `);
     try {
       // Connecting to smart contract
