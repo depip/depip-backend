@@ -167,7 +167,7 @@ export class LicenseTermsService {
         });
       } else{
         licenseTerms = getLicenseTermByType(Number(pilType), {
-          royaltyPolicyLAPAddress: ENV_CONFIG.STORY_PROTOCOL_CONTRACT.ROYALTY_POLICYLAP,
+          royaltyPolicyLAPAddress: "0x0000000000000000000000000000000000000000",
         });        
       }
 
@@ -209,8 +209,10 @@ export class LicenseTermsService {
       //     termId: Number(licenseTermsIdNew),
       //   }
       // } 
-
-      const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms);
+      // const gasLimit = await this.licenseTemplateContract.estimateGas.registerLicenseTerms(licenseTerms);
+      // this._logger.log(`gasLimit: ` + gasLimit);
+      const txHash = await this.licenseTemplateContract.registerLicenseTerms(licenseTerms, {gasLimit: 1600000, gasPrice: 12000
+     });
       const res = await txHash.wait();
       if (res.status !== 1) {
         return {

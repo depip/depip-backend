@@ -64,14 +64,21 @@ export class LicenseService {
       //   }
       // } 
 
+      // const gasLimit = await this.licenseModuleContract.estimateGas.mintLicenseTokens(        
+      //   licensorIpId,
+      //   this.licenseTemplateAddr,
+      //   licenseTermsId,
+      //   amount,
+      //   receiver,
+      //   "0x0000000000000000000000000000000000000000");
+      // this._logger.log(`gasLimit: ` + gasLimit);
+  
       const tx = await this.licenseModuleContract.mintLicenseTokens(
         licensorIpId,
         this.licenseTemplateAddr,
         licenseTermsId,
         amount,
-        receiver,
-        "0x0000000000000000000000000000000000000000"
-      );
+        receiver);
       const res = await tx.wait();
       if (res.status !== 1) {
         alert('error message');
