@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { DeleteResult, OrderByCondition, Repository } from 'typeorm';
+import { DeleteResult, FindManyOptions, OrderByCondition, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { PaginatorResponse } from '../dtos/responses/paginator.response';
 
@@ -16,7 +16,7 @@ export class BaseRepository<T> {
    * @param options
    * @returns
    */
-  public find(options: any): Promise<T[]> {
+  public find(options: FindManyOptions): Promise<T[]> {
     return this._repos.find(options);
   }
 
@@ -39,12 +39,7 @@ export class BaseRepository<T> {
    * @param orderBy
    * @returns
    */
-  public async findByCondition(
-    condition: any,
-    orderBy?: any,
-    select?: string[],
-    take?: number,
-  ): Promise<T[]> {
+  public async findByCondition(condition: any, orderBy?: any, select?: string[], take?: number): Promise<T[]> {
     const opt = { where: condition };
     if (orderBy) opt['order'] = orderBy;
     if (select) opt['select'] = select;
@@ -87,7 +82,7 @@ export class BaseRepository<T> {
     pageIndex: number,
     pageSize: number,
     condition: any = null,
-    orderBy: any = null,
+    orderBy: any = null
   ): Promise<PaginatorResponse> {
     const opt = {};
     const paginatorResponse = new PaginatorResponse();
@@ -154,9 +149,7 @@ export class BaseRepository<T> {
    * @param conflictPathsOrOptions
    */
   public async upsert(data: Array<any>, conflictPathsOrOptions: string[]) {
-    const results = await this._repos
-      .upsert(data, conflictPathsOrOptions)
-      .then((t) => t.identifiers);
+    const results = await this._repos.upsert(data, conflictPathsOrOptions).then((t) => t.identifiers);
 
     return results;
   }
@@ -166,10 +159,7 @@ export class BaseRepository<T> {
    * @param column
    */
   max(column: string): Promise<any> {
-    return this._repos
-      .createQueryBuilder()
-      .select(`max(${column}) as ${column}`)
-      .getRawOne();
+    return this._repos.createQueryBuilder().select(`max(${column}) as ${column}`).getRawOne();
   }
 
   /**
@@ -180,12 +170,7 @@ export class BaseRepository<T> {
    * @param orderBy
    * @returns
    */
-  queryData(
-    column: string,
-    conditions?: any,
-    groupBy?: string,
-    orderBy?: OrderByCondition,
-  ) {
+  queryData(column: string, conditions?: any, groupBy?: string, orderBy?: OrderByCondition) {
     let query = this._repos.createQueryBuilder().select(`${column}`);
 
     if (conditions) {
@@ -219,7 +204,7 @@ export class BaseRepository<T> {
     pageIndex: number,
     conditions?: any,
     groupBy?: string,
-    orderBy?: OrderByCondition,
+    orderBy?: OrderByCondition
   ) {
     let query = this._repos
       .createQueryBuilder()
@@ -250,7 +235,7 @@ export class BaseRepository<T> {
    */
   async insertOnDuplicate(
     entityOrEntities: QueryDeepPartialEntity<T> | QueryDeepPartialEntity<T>[],
-    skipPropetties?: string[],
+    skipPropetties?: string[]
   ) {
     try {
       let updateColumns = '';
@@ -267,18 +252,14 @@ export class BaseRepository<T> {
       // Skip column not update value
       let mapSkipColumns = [];
       if (skipPropetties) {
-        mapSkipColumns = metadata
-          .mapPropertyPathsToColumns(skipPropetties)
-          .map((m) => m.databaseName);
+        mapSkipColumns = metadata.mapPropertyPathsToColumns(skipPropetties).map((m) => m.databaseName);
       }
 
       // Update column
       columns.forEach((item) => {
         if (mapSkipColumns.indexOf(item) < 0) {
           updateColumns +=
-            updateColumns.length === 0
-              ? `\`${item}\`= VALUES(\`${item}\`)`
-              : `,\`${item}\`= VALUES(\`${item}\`)`;
+            updateColumns.length === 0 ? `\`${item}\`= VALUES(\`${item}\`)` : `,\`${item}\`= VALUES(\`${item}\`)`;
         }
       });
 
@@ -313,12 +294,8 @@ export class BaseRepository<T> {
    * @param values
    * @returns
    */
-  valueOfEnities(
-    values: QueryDeepPartialEntity<T> | QueryDeepPartialEntity<T>[],
-  ) {
-    const expressionMap = this._repos.manager
-      .createQueryBuilder()
-      .expressionMap.clone();
+  valueOfEnities(values: QueryDeepPartialEntity<T> | QueryDeepPartialEntity<T>[]) {
+    const expressionMap = this._repos.manager.createQueryBuilder().expressionMap.clone();
     expressionMap.valuesSet = values;
     return expressionMap;
   }
