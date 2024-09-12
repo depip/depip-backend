@@ -29,6 +29,7 @@ import { SpgModule } from './modules/spg/spg.module';
 import { SyncIpassetProcessor } from './services/processor/sync-ipasset.processor';
 import { SyncIpassetDataProcessor } from './services/processor/sync-ipasset-data.processor';
 import { IPAssetDataRepository } from './repositories/ipasset-data.repository';
+import { SyncLicenseProcessor } from './services/processor/sync-license.processor';
 
 const controllers = [];
 const entities = [BlockSync, IPAassets, LicenseToken, DisputeRaise, DisputeCancelled, Derivative, IPAssetData];
@@ -45,7 +46,7 @@ export const repositories = [
 
 const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService, SyncDerivativeService];
 
-const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor];
+const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor, SyncLicenseProcessor];
 
 @Module({
   imports: [
@@ -71,12 +72,16 @@ const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor];
     }),
     BullModule.registerQueue(
       {
-        name: ENV_CONFIG.IPASSET_SYNC,
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC,
         processors: ['./src/services/processor/sync-ipasset.processor.ts'],
       },
       {
-        name: ENV_CONFIG.IPASSET_DATA_SYNC,
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_DATA_SYNC,
         processors: ['./src/services/processor/sync-ipasset-data.processor.ts'],
+      },
+      {
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC,
+        processors: ['./src/services/processor/sync-license.processor.ts'],
       }
     ),
     CacheModule.register({ ttl: 10000 }),

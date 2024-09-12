@@ -46,6 +46,7 @@ export class ConfigService {
       TIMES_SYNC: Number(process.env.TIMES_SYNC) || 3000,
       IPASSET_SYNC: process.env.IPASSET_SYNC || 'IPAsset',
       TIME_SYNC_IPASSET: Number(process.env.TIME_SYNC_IPASSET) || 10000,
+      TIME_SYNC_LICENSE: Number(process.env.TIME_SYNC_LICENSE) || 10000,
       IPASSET_DATA_SYNC: process.env.IPASSET_DATA_SYNC || 'IPAssetData',
       TOKENLICENSE_SYNC: Number(process.env.LICENSE_SYNC) || 'TokenLicense',
       DISPUTE_SYNC: process.env.DISPUTE_SYNC || 'Dispute',
@@ -91,8 +92,9 @@ export class ConfigService {
       },
       STORY_PROTOCOL_SYNC: {
         IPASSET_SYNC: process.env.IPASSET_SYNC || 'IPAsset',
+        IPASSET_DATA_SYNC: process.env.IPASSET_DATA_SYNC || 'IPAssetData',
         LICENSE_SYNC: process.env.LICENSE_SYNC || 'License',
-        DISPUTE_SYNC: process.env.LICENSE_SYNC || 'License',
+        DISPUTE_SYNC: process.env.LICENSE_SYNC || 'Dispute',
         DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || 'Derivative',
       },
       PARTICAL_NETWORK: {

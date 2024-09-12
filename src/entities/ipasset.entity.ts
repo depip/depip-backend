@@ -12,6 +12,7 @@ export class IPAassets extends BaseEntityIncrementId {
   token_id: string;
 
   @Column({ name: 'ip_id' })
+  @Index()
   ip_id: string;
 
   @Column()
