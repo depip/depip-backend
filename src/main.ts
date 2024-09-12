@@ -31,8 +31,8 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Depip Backend Swagger')
     .setVersion('0.1')
-    .addServer('/')
     .addServer(configService.get('SWAGGER_PATH'))
+    .addServer('/')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('documentation', app, document);

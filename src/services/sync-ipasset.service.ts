@@ -37,7 +37,7 @@ export class SyncIPAssetService {
       {
         removeOnComplete: true,
         repeat: {
-          every: ENV_CONFIG.TIMES_SYNC,
+          every: ENV_CONFIG.TIME_SYNC_IPASSET,
         },
       }
     );
