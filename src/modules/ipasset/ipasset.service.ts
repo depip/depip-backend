@@ -1,16 +1,13 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger, Inject } from '@nestjs/common';
 import { ENV_CONFIG } from '../../shared/services/config.service';
-import {
-  Contract,
-  JsonRpcProvider,
-  Wallet,
-  formatEther,
-  parseEther,
-  Interface
-} from 'ethers';
+import { Contract, JsonRpcProvider, Wallet, formatEther, parseEther, Interface } from 'ethers';
 import * as fs from 'fs';
 import path from 'path';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
+import { IPAassetsRepository } from '../../repositories/ipasset.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IPAassets } from '../../entities';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class IpassetService {
@@ -25,7 +22,8 @@ export class IpassetService {
 
   constructor(
     private smartAccountService: SmartAccountService,
-  ) {}      
+    private ipassetsRepository: IPAassetsRepository // @Inject(IPAassets) private readonly ipassetsRepository: Repository<IPAassets>
+  ) {}
 
   async registerIpasset(nftAddr: string, tokenId: string, session: any, userWallet: string) {
     this._logger.log(`perform registration ipasset! `);
@@ -41,42 +39,40 @@ export class IpassetService {
       }
       // this._logger.log(`session: ` + JSON.stringify(session));
       // this._logger.log(`userWallet: ` + userWallet);
-      
 
-      const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
+      const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID);
       if (isRegistered) {
         return {
-          status: "success",
-          tx: "",
+          status: 'success',
+          tx: '',
           ipId: isRegistered,
-        }
+        };
         // return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
       }
-      
+
       this._logger.log(`perform to call contract! `);
 
-      const txRaw = await this.contractWithMasterWallet.register.populateTransaction(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
-      const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session)
+      const txRaw = await this.contractWithMasterWallet.register.populateTransaction(
+        ENV_CONFIG.NODE.CHAINID,
+        nftAddr,
+        tokenId
+      );
+      const txSigned = await this.smartAccountService.signAndSendTx(userWallet, txRaw, session);
 
       if (txSigned.error) {
         // alert('error message');
         return {
-          status: "fail",
-          error: txSigned.error.data.extraMessage
-        }
-
-      }else{
-        const ipId = await this.contractWithMasterWallet.ipId(
-          ENV_CONFIG.NODE.CHAINID,
-          nftAddr,
-          tokenId
-        );      
+          status: 'fail',
+          error: txSigned.error.data.extraMessage,
+        };
+      } else {
+        const ipId = await this.contractWithMasterWallet.ipId(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
 
         return {
-          status: "success",
+          status: 'success',
           tx: txSigned.result,
           ipId: ipId,
-        }
+        };
       }
       // const tx = await this.contractWithMasterWallet.register(
       //   ENV_CONFIG.NODE.CHAINID,
@@ -92,7 +88,7 @@ export class IpassetService {
       //     ENV_CONFIG.NODE.CHAINID,
       //     nftAddr,
       //     tokenId
-      //   );      
+      //   );
 
       //   return {
       //     status: "success",
@@ -101,15 +97,12 @@ export class IpassetService {
       //   }
       // }
     } catch (error) {
-      this._logger.log(
-        `error when register ipasset :${nftAddr}`,
-        error.stack,
-      );
+      this._logger.log(`error when register ipasset :${nftAddr}`, error.stack);
       return {
-        status: "fail",
-        error: "simulate fail when register ipasset ",
-      }
-    }       
+        status: 'fail',
+        error: 'simulate fail when register ipasset ',
+      };
+    }
   }
 
   async registerIpassetOld(nftAddr: string, tokenId: string) {
@@ -125,50 +118,39 @@ export class IpassetService {
         }
       }
 
-      const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID)
+      const isRegistered = await this.isNftRegistered(nftAddr, tokenId, ENV_CONFIG.NODE.CHAINID);
       if (isRegistered) {
         return {
-          status: "success",
-          tx: "",
+          status: 'success',
+          tx: '',
           ipId: isRegistered,
-        }
+        };
         // return "Register fail: " + "NFT " + nftAddr + ", token ID " + tokenId + " is Registered. IPID: " + isRegistered
       }
-      
+
       this._logger.log(`perform to call contract! `);
-      const tx = await this.contractWithMasterWallet.register(
-        ENV_CONFIG.NODE.CHAINID,
-        nftAddr,
-        tokenId
-      );
+      const tx = await this.contractWithMasterWallet.register(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
       const res = await tx.wait();
       if (res.status !== 1) {
         // alert('error message');
-        return "Register fail: " + res.hash
-      }else{
-        const ipId = await this.contractWithMasterWallet.ipId(
-          ENV_CONFIG.NODE.CHAINID,
-          nftAddr,
-          tokenId
-        );      
+        return 'Register fail: ' + res.hash;
+      } else {
+        const ipId = await this.contractWithMasterWallet.ipId(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
 
         return {
-          status: "success",
+          status: 'success',
           tx: res.hash,
           ipId: ipId,
-        }
+        };
       }
     } catch (error) {
-      this._logger.log(
-        `error when register ipasset :${nftAddr}`,
-        error.stack,
-      );
+      this._logger.log(`error when register ipasset :${nftAddr}`, error.stack);
       return {
-        status: "fail",
-        error: "simulate fail when register ipasset ",
-      }
-    }       
-  }  
+        status: 'fail',
+        error: 'simulate fail when register ipasset ',
+      };
+    }
+  }
 
   async _getContract() {
     this.masterWallet = new Wallet(ENV_CONFIG.MASTERWALLET, new JsonRpcProvider(this.PROVIDER_URL));
@@ -181,15 +163,11 @@ export class IpassetService {
     }
 
     // Connecting to smart contract
-    const contract = new Contract(
-      this.ipassetContractAddr,
-      this.CONTRACT_ABI,
-      this.PROVIDER
-    );
+    const contract = new Contract(this.ipassetContractAddr, this.CONTRACT_ABI, this.PROVIDER);
 
     const rs = contract.connect(this.masterWallet);
     return rs;
-  }  
+  }
 
   async isNftRegistered(nftAddr: string, tokenId: string, chainId: string) {
     try {
@@ -202,26 +180,19 @@ export class IpassetService {
           throw new Error(errMsg);
         }
       }
-      const ipId = await this.contractWithMasterWallet.ipId(
-        ENV_CONFIG.NODE.CHAINID,
-        nftAddr,
-        tokenId
-      );
+      const ipId = await this.contractWithMasterWallet.ipId(ENV_CONFIG.NODE.CHAINID, nftAddr, tokenId);
       this._logger.log(`ipId ` + ipId);
       const isRegistered = await this.contractWithMasterWallet.isRegistered(ipId);
-      if(isRegistered){
+      if (isRegistered) {
         return ipId;
-      }else{
+      } else {
         return false;
       }
     } catch (error) {
-      this._logger.log(
-        `error when call contract :${this.ipassetContractAddr}`,
-        error.stack,
-      );
+      this._logger.log(`error when call contract :${this.ipassetContractAddr}`, error.stack);
       throw error.message;
-    }    
-  }  
+    }
+  }
 
   async isIpIdRegistered(ipId: string) {
     try {
@@ -237,17 +208,36 @@ export class IpassetService {
 
       this._logger.log(`ipId ` + ipId);
       const isRegistered = await this.contractWithMasterWallet.isRegistered(ipId);
-      if(isRegistered){
+      if (isRegistered) {
         return ipId;
-      }else{
+      } else {
         return false;
       }
     } catch (error) {
-      this._logger.log(
-        `error when call contract :${this.ipassetContractAddr}`,
-        error.stack,
-      );
+      this._logger.log(`error when call contract :${this.ipassetContractAddr}`, error.stack);
       throw error;
-    }    
-  }   
+    }
+  }
+
+  async getIpAsset(owner: string, chainId: string, pageLimit: number, pageOffset: number) {
+    try {
+      const res = await this.ipassetsRepository.find({
+        where: {
+          chain_id: chainId,
+          ipAssetData: {
+            owner: owner,
+          },
+        },
+        order: {
+          id: 'DESC',
+        },
+        take: pageLimit,
+        skip: pageOffset,
+        relations: ['ipAssetData'],
+      });
+      return res;
+    } catch (error) {
+      this._logger.error(error);
+    }
+  }
 }
