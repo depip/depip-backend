@@ -3,10 +3,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { middleware as expressCtx } from 'express-ctx';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
-import { ConfigService } from './shared/services/config.service';
+import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 import { ValidationPipe } from '@nestjs/common';
-
+import { ExpressAdapter } from '@bull-board/express';
+const { BullAdapter } = require('@bull-board/api/bullAdapter');
+const { createBullBoard } = require('@bull-board/api');
+const Queue = require('bull');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // app.use(expressCtx);
@@ -33,6 +36,28 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('documentation', app, document);
+
+  // setup bullboard
+  const serverAdapter = new ExpressAdapter();
+  serverAdapter.setBasePath('/admin/queues');
+  const queues = [ENV_CONFIG.IPASSET_SYNC, ENV_CONFIG.IPASSET_DATA_SYNC].map((e) => {
+    return new BullAdapter(
+      new Queue(
+        e,
+        `redis://${ENV_CONFIG.REDIS.USERNAME}:${ENV_CONFIG.REDIS.PASSWORD}@${ENV_CONFIG.REDIS.HOST}:${ENV_CONFIG.REDIS.PORT}/${ENV_CONFIG.REDIS.DB}`,
+        {
+          prefix: ENV_CONFIG.REDIS.PREFIX,
+        }
+      )
+    );
+  });
+
+  createBullBoard({
+    queues: queues,
+    serverAdapter,
+  });
+
+  app.use('/admin/queues', serverAdapter.getRouter());
 
   await app.listen(configService.ENV_CONFIG.APP_PORT);
 }

@@ -3,7 +3,7 @@ import { BullModule } from '@nestjs/bull';
 import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
-import { BlockSync, IPAassets } from './entities';
+import { BlockSync, IPAassets, IPAssetData } from './entities';
 import { BlockSyncRepository } from './repositories/block-sync.repository';
 import { IPAassetsRepository } from './repositories/ipasset.repository';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
@@ -26,22 +26,26 @@ import { IpassetModule } from './modules/ipasset/ipasset.module';
 import { LicenseTermsModule } from './modules/licenseTerms/licenseTerms.module';
 import { LicenseModule } from './modules/license/license.module';
 import { SpgModule } from './modules/spg/spg.module';
+import { SyncIpassetProcessor } from './services/processor/sync-ipasset.processor';
+import { SyncIpassetDataProcessor } from './services/processor/sync-ipasset-data.processor';
+import { IPAssetDataRepository } from './repositories/ipasset-data.repository';
 
 const controllers = [];
-const entities = [BlockSync, IPAassets, LicenseToken,DisputeRaise, DisputeCancelled, Derivative];
+const entities = [BlockSync, IPAassets, LicenseToken, DisputeRaise, DisputeCancelled, Derivative, IPAssetData];
 
-const repositories = [
+export const repositories = [
   BlockSyncRepository,
   IPAassetsRepository,
+  IPAssetDataRepository,
   LicenseTokenRepository,
   DisputeRaiseRepository,
   DisputeCancelledRepository,
-  DerivativeRepository
+  DerivativeRepository,
 ];
 
-const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService,SyncDerivativeService];
+const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService, SyncDerivativeService];
 
-const processors = [];
+const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor];
 
 @Module({
   imports: [
@@ -53,21 +57,28 @@ const processors = [];
       }),
     }),
     BullModule.forRoot({
-      // redis: {
-      //   host: ENV_CONFIG.REDIS.HOST,
-      //   port: ENV_CONFIG.REDIS.PORT,
-      //   username: ENV_CONFIG.REDIS.USERNAME,
-      //   db: parseInt(ENV_CONFIG.REDIS.DB, 10),
-      // },
-      // prefix: ENV_CONFIG.REDIS.PREFIX,
+      redis: {
+        host: ENV_CONFIG.REDIS.HOST,
+        port: ENV_CONFIG.REDIS.PORT,
+        username: ENV_CONFIG.REDIS.USERNAME,
+        db: parseInt(ENV_CONFIG.REDIS.DB, 10),
+      },
+      prefix: ENV_CONFIG.REDIS.PREFIX,
       defaultJobOptions: {
         removeOnFail: ENV_CONFIG.KEEP_JOB_COUNT,
         removeOnComplete: { count: ENV_CONFIG.KEEP_JOB_COUNT },
       },
     }),
-    // BullModule.registerQueue({
-    //   name: 'smart-contracts',
-    // }),
+    BullModule.registerQueue(
+      {
+        name: ENV_CONFIG.IPASSET_SYNC,
+        processors: ['./src/services/processor/sync-ipasset.processor.ts'],
+      },
+      {
+        name: ENV_CONFIG.IPASSET_DATA_SYNC,
+        processors: ['./src/services/processor/sync-ipasset-data.processor.ts'],
+      }
+    ),
     CacheModule.register({ ttl: 10000 }),
     SharedModule,
     BedrockAgentModule,
