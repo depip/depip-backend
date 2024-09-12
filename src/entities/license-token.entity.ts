@@ -1,4 +1,4 @@
-import { Column, Entity, Unique } from 'typeorm';
+import { Column, Entity, Index, Unique } from 'typeorm';
 import { BaseEntityIncrementId } from './base/base.entity';
 
 @Entity('licensetoken')
@@ -12,6 +12,11 @@ export class LicenseToken extends BaseEntityIncrementId {
 
   @Column({ name: 'token_id' })
   token_id: string;
+
   @Column()
   signature: string;
+
+  @Column()
+  @Index()
+  licensor_ip_id: string;
 }

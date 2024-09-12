@@ -8,7 +8,7 @@ import { CommonService } from '../common.service';
 import IPAssetRegistryABI from '../../web3/ABI/IPAssetRegistry.json';
 import { AbiItem } from 'web3-utils';
 import { IPAassets } from '../../entities';
-@Processor({ name: ENV_CONFIG.IPASSET_SYNC })
+@Processor({ name: ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC })
 export class SyncIpassetProcessor {
   private readonly _logger = new Logger(SyncIpassetProcessor.name);
   constructor(
@@ -20,11 +20,13 @@ export class SyncIpassetProcessor {
   @Process({ name: 'syncIpAsset', concurrency: 1 })
   async SyncIPAssetService(job: Job<unknown>) {
     try {
-      const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(ENV_CONFIG.IPASSET_SYNC);
+      const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(
+        ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC
+      );
       var fBlock = fromBlock;
       if (isExcute) {
         await this.processBlock(fromBlock, toBlock);
-        this.commonService.updateStatus(toBlock + 1, ENV_CONFIG.IPASSET_SYNC);
+        this.commonService.updateStatus(toBlock + 1, ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC);
       }
     } catch (error) {
       this._logger.log(`error when generate base blocks:${fBlock}`, error.stack);
@@ -55,7 +57,7 @@ export class SyncIpassetProcessor {
         ipaasset.registration_date = newIPasset.returnValues.registrationDate;
         ipaassets.push(ipaasset);
       } catch (error) {
-        this._logger.log(`error when generate base blocks:${fromBlock}`, error.stack);
+        this._logger.error(`error when generate base blocks:${fromBlock}`, error.stack);
         throw error;
       }
     });

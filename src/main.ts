@@ -40,7 +40,11 @@ async function bootstrap() {
   // setup bullboard
   const serverAdapter = new ExpressAdapter();
   serverAdapter.setBasePath('/admin/queues');
-  const queues = [ENV_CONFIG.IPASSET_SYNC, ENV_CONFIG.IPASSET_DATA_SYNC].map((e) => {
+  const queues = [
+    ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC,
+    ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_DATA_SYNC,
+    ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC,
+  ].map((e) => {
     return new BullAdapter(
       new Queue(
         e,
