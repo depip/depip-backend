@@ -87,8 +87,14 @@ export class SyncIpassetDataProcessor {
         await this.ipAssetDataRepository.update(ipAssetDataDB);
       }
     } else {
+      throw Error(`Token ${job.data.tokenId} not found on contract ${job.data.contractAddress.toLowerCase()}`);
+    }
+
+    if (response.data[horoscopeChainDB].erc721_token[0].media_info === null) {
       throw Error(
-        `Metadata not found with token ${job.data.tokenId} on contract ${job.data.contractAddress.toLowerCase()}`
+        `Media info is null when query token ${
+          job.data.tokenId
+        } not found on contract ${job.data.contractAddress.toLowerCase()}`
       );
     }
   }
