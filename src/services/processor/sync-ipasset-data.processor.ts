@@ -86,6 +86,10 @@ export class SyncIpassetDataProcessor {
         ipAssetDataDB.metadata_offchain = response.data[horoscopeChainDB].erc721_token[0].media_info?.offchain;
         await this.ipAssetDataRepository.update(ipAssetDataDB);
       }
+    } else {
+      throw Error(
+        `Metadata not found with token ${job.data.tokenId} on contract ${job.data.contractAddress.toLowerCase()}`
+      );
     }
   }
 }
