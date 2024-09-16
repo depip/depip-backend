@@ -54,8 +54,11 @@ export class SyncIpassetDataProcessor {
       },
       {
         removeOnComplete: true,
-        attempts: 3,
-        backoff: 10000,
+        attempts: 10,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       }
     );
   }
