@@ -5,17 +5,17 @@ import { IpassetController } from './ipasset.controller';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IPFSService } from '../files/ipfs.service';
-import { IPAassetsRepository } from '../../repositories/ipasset.repository';
-import { IPAassets } from '../../entities';
+import { IPAssetsRepository } from '../../repositories/ipasset.repository';
+import { IPAssets } from '../../entities';
 
-export const repositories = [IPAassetsRepository];
+export const repositories = [IPAssetsRepository];
 
 @Module({
   imports: [
     BullModule.registerQueue({
       name: 'Ipasset',
     }),
-    TypeOrmModule.forFeature([IPAassets]),
+    TypeOrmModule.forFeature([IPAssets]),
   ],
   providers: [IpassetService, SmartAccountService, IPFSService, ...repositories],
   controllers: [IpassetController],

@@ -5,16 +5,16 @@ import { IpassetService } from '../ipasset/ipasset.service';
 import { LicenseController } from './license.controller';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IPAassets } from 'src/entities';
-import { IPAassetsRepository } from 'src/repositories/ipasset.repository';
+import { IPAssets } from 'src/entities';
+import { IPAssetsRepository } from 'src/repositories/ipasset.repository';
 
-export const repositories = [IPAassetsRepository];
+export const repositories = [IPAssetsRepository];
 @Module({
   imports: [
     BullModule.registerQueue({
       name: 'License',
     }),
-    TypeOrmModule.forFeature([IPAassets]),
+    TypeOrmModule.forFeature([IPAssets]),
   ],
   providers: [LicenseService, IpassetService, SmartAccountService, ...repositories],
   controllers: [LicenseController],

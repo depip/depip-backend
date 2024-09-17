@@ -3,50 +3,80 @@ import { BullModule } from '@nestjs/bull';
 import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
-import { BlockSync, IPAassets, IPAssetData } from './entities';
-import { BlockSyncRepository } from './repositories/block-sync.repository';
-import { IPAassetsRepository } from './repositories/ipasset.repository';
+import {
+  BlockSync,
+  IPAssets,
+  IPAssetData,
+  LicenseAttach,
+  DisputeCancelled,
+  Derivative,
+  LicenseToken,
+  DisputeRaise,
+} from './entities';
+import {
+  BlockSyncRepository,
+  IPAssetsRepository,
+  LicenseTokenRepository,
+  DisputeRaiseRepository,
+  DisputeCancelledRepository,
+  DerivativeRepository,
+  IPAssetDataRepository,
+  LicenseAttachRepository,
+} from './repositories';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 import { BedrockAgentModule } from './modules/bedrockAgent/bedrockAgent.module';
 import { SyncIPAssetService } from './services/sync-ipasset.service';
-import { LicenseTokenRepository } from './repositories/licensetoken.repository';
-import { LicenseToken } from './entities/license-token.entity';
 import { SyncLicenseService } from './services/sync-license.service';
 import { SyncDisputeService } from './services/sync-dispute.service';
-import { DisputeRaiseRepository } from './repositories/dispute-raise.repository';
-import { DisputeRaise } from './entities/dispute-raise.entity';
-import { DisputeCancelled } from './entities/dispute-cancelled.entity';
-import { DisputeCancelledRepository } from './repositories/dispute-cancelled.repository';
 import { CommonService } from './services/common.service';
-import { DerivativeRepository } from './repositories/derivative.repository';
 import { SyncDerivativeService } from './services/sync-derivative.service';
-import { Derivative } from './entities/derivative.entity';
 import { IpassetModule } from './modules/ipasset/ipasset.module';
 import { LicenseTermsModule } from './modules/licenseTerms/licenseTerms.module';
 import { LicenseModule } from './modules/license/license.module';
 import { SpgModule } from './modules/spg/spg.module';
-import { SyncIpassetProcessor } from './services/processor/sync-ipasset.processor';
-import { SyncIpassetDataProcessor } from './services/processor/sync-ipasset-data.processor';
-import { IPAssetDataRepository } from './repositories/ipasset-data.repository';
-import { SyncLicenseProcessor } from './services/processor/sync-license.processor';
+import {
+  SyncIpassetDataProcessor,
+  SyncLicenseProcessor,
+  SyncIpassetProcessor,
+  SyncLicenseAttachProcessor,
+} from './services/processor';
+import { SyncDerivativeProcessor } from './services/processor/sync-derivative.processor';
+import { SyncDisputeProcessor } from './services/processor/sync-dispute.processor';
 
 const controllers = [];
-const entities = [BlockSync, IPAassets, LicenseToken, DisputeRaise, DisputeCancelled, Derivative, IPAssetData];
+const entities = [
+  BlockSync,
+  IPAssets,
+  LicenseToken,
+  DisputeRaise,
+  DisputeCancelled,
+  Derivative,
+  IPAssetData,
+  LicenseAttach,
+];
 
 export const repositories = [
   BlockSyncRepository,
-  IPAassetsRepository,
+  IPAssetsRepository,
   IPAssetDataRepository,
   LicenseTokenRepository,
   DisputeRaiseRepository,
   DisputeCancelledRepository,
   DerivativeRepository,
+  LicenseAttachRepository,
 ];
 
 const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService, SyncDerivativeService];
 
-const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor, SyncLicenseProcessor];
+const processors = [
+  SyncIpassetProcessor,
+  SyncIpassetDataProcessor,
+  SyncLicenseProcessor,
+  SyncLicenseAttachProcessor,
+  SyncDerivativeProcessor,
+  SyncDisputeProcessor,
+];
 
 @Module({
   imports: [
@@ -62,7 +92,7 @@ const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor, SyncLicenseP
         host: ENV_CONFIG.REDIS.HOST,
         port: ENV_CONFIG.REDIS.PORT,
         username: ENV_CONFIG.REDIS.USERNAME,
-        db: parseInt(ENV_CONFIG.REDIS.DB, 10),
+        db: parseInt(ENV_CONFIG.REDIS.DB, 0),
       },
       prefix: ENV_CONFIG.REDIS.PREFIX,
       defaultJobOptions: {
@@ -82,6 +112,18 @@ const processors = [SyncIpassetProcessor, SyncIpassetDataProcessor, SyncLicenseP
       {
         name: ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC,
         processors: ['./src/services/processor/sync-license.processor.ts'],
+      },
+      {
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_ATTACH_SYNC,
+        processors: ['./src/services/processor/sync-license-attach.processor.ts'],
+      },
+      {
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.DERIVATIVE_SYNC,
+        processors: ['./src/services/processor/sync-derivative.processor.ts'],
+      },
+      {
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.DISPUTE_SYNC,
+        processors: ['./src/services/processor/sync-dispute.processor.ts'],
       }
     ),
     CacheModule.register({ ttl: 10000 }),

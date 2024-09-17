@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, OneToOne, Unique } from 'typeorm';
 import { BaseEntityIncrementId } from './base/base.entity';
-import { IPAassets } from './ipasset.entity';
+import { IPAssets } from './ipasset.entity';
 
 @Entity('ipasset_data')
 @Unique(['id'])
@@ -34,7 +34,7 @@ export class IPAssetData extends BaseEntityIncrementId {
   @Index()
   ip_id: string;
 
-  @OneToOne(() => IPAassets, (ipasset) => ipasset.ipAssetData)
+  @OneToOne(() => IPAssets, (ipasset) => ipasset.ipAssetData)
   @JoinColumn({ name: 'ipasset_id' })
-  ipAsset: IPAassets;
+  ipAsset: IPAssets;
 }

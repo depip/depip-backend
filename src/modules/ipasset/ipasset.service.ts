@@ -4,9 +4,9 @@ import { Contract, JsonRpcProvider, Wallet, formatEther, parseEther, Interface }
 import * as fs from 'fs';
 import path from 'path';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
-import { IPAassetsRepository } from '../../repositories/ipasset.repository';
+import { IPAssetsRepository } from '../../repositories/ipasset.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IPAassets } from '../../entities';
+import { IPAssets } from '../../entities';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -20,10 +20,7 @@ export class IpassetService {
   private contractWithMasterWallet = null;
   private masterWallet = null;
 
-  constructor(
-    private smartAccountService: SmartAccountService,
-    private ipassetsRepository: IPAassetsRepository // @Inject(IPAassets) private readonly ipassetsRepository: Repository<IPAassets>
-  ) {}
+  constructor(private smartAccountService: SmartAccountService, private ipassetsRepository: IPAssetsRepository) {}
 
   async registerIpasset(nftAddr: string, tokenId: string, session: any, userWallet: string) {
     this._logger.log(`perform registration ipasset! `);

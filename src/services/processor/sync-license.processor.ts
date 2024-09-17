@@ -22,11 +22,11 @@ export class SyncLicenseProcessor {
       );
       var fBlock = fromBlock;
       if (isExcute) {
-        await this.processBlock(fromBlock, toBlock);
-        this.commonService.updateStatus(toBlock + 1, ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC);
+        await this.processBlockSyncLicense(fromBlock, toBlock);
+        await this.commonService.updateStatus(toBlock + 1, ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC);
       }
     } catch (error) {
-      this._logger.log(`error when generate base blocks:${fBlock}`, error.stack);
+      this._logger.error(`error when generate base blocks:${fBlock}`, error.stack);
       throw error;
     }
   }
@@ -35,7 +35,7 @@ export class SyncLicenseProcessor {
    * Process block
    * @param newLastBlock
    */
-  async processBlock(fromBlock, toBlock) {
+  async processBlockSyncLicense(fromBlock, toBlock) {
     const licenseTokenContract = Contract(ENV_CONFIG.STORY_PROTOCOL_CONTRACT.LICENSE, LicenseTokenABI as AbiItem[]);
     this._logger.log(`Sync license from block ${fromBlock} to block ${toBlock}`);
     var newLicenseTokens: any = await licenseTokenContract.getPastEvents('LicenseTokenMinted', {

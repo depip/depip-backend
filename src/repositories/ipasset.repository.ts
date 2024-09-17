@@ -1,29 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPAassets } from '../entities';
+import { IPAssets } from '../entities';
 import { BaseRepository } from './base.repository';
 
 @Injectable()
-export class IPAassetsRepository extends BaseRepository<IPAassets> {
-  private readonly _logger = new Logger(IPAassetsRepository.name);
+export class IPAssetsRepository extends BaseRepository<IPAssets> {
+  private readonly _logger = new Logger(IPAssetsRepository.name);
   constructor(
-    @InjectRepository(IPAassets)
-    private readonly repos: Repository<IPAassets>,
+    @InjectRepository(IPAssets)
+    private readonly repos: Repository<IPAssets>
   ) {
     super(repos);
-    this._logger.log(
-      '============== Constructor IPAassets Repository ==============',
-    );
-  }
-  async countCw20TokensHavingCoinId() {
-    const sqlSelect = `tm.contract_address, tm.coin_id`;
-
-    const queryBuilder = this.repos
-      .createQueryBuilder('tm')
-      .select(sqlSelect)
-      .where("tm.coin_id <> '' ");
-
-    return await queryBuilder.getCount();
+    this._logger.log('============== Constructor IPAssets Repository ==============');
   }
 }
