@@ -71,7 +71,7 @@ export class SyncIpassetProcessor {
               ipId: ipasset.ip_id,
               chainId: ipasset.chain_id.toString(),
             },
-            options: {
+            opts: {
               removeOnComplete: true,
               removeOnFail: false,
               attempts: 3,
