@@ -4,7 +4,7 @@ import { IPAssetData } from './ipasset-data.entity';
 
 @Entity('ipasset')
 @Unique(['id'])
-export class IPAassets extends BaseEntityIncrementId {
+export class IPAssets extends BaseEntityIncrementId {
   @Column({ name: 'contract_address' })
   contract_address: string;
 
@@ -29,4 +29,7 @@ export class IPAassets extends BaseEntityIncrementId {
 
   @OneToOne(() => IPAssetData, (ipassetData) => ipassetData.ipAsset)
   ipAssetData: IPAssetData;
+
+  @Column({ nullable: true })
+  numberLicenseAttached: number;
 }

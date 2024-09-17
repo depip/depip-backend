@@ -6,15 +6,25 @@ import { Queue } from 'bull';
 @Injectable()
 export class SyncLicenseService {
   private readonly _logger = new Logger(SyncLicenseService.name);
-  constructor(@InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC) private ipassetQueue: Queue) {
+  constructor(@InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC) private licenseQueue: Queue) {
     this._logger.log('============== Constructor License Sync Task Service ==============');
-    this.ipassetQueue.add(
+    this.licenseQueue.add(
       'syncLicense',
       {},
       {
         removeOnComplete: true,
         repeat: {
           every: ENV_CONFIG.TIME_SYNC_LICENSE,
+        },
+      }
+    );
+    this.licenseQueue.add(
+      'syncLicenseAttach',
+      {},
+      {
+        removeOnComplete: true,
+        repeat: {
+          every: ENV_CONFIG.TIME_SYNC_LICENSE_ATTACH,
         },
       }
     );

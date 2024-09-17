@@ -1,11 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { IPAassets } from '../entities';
-import { IPAassetsRepository } from '../repositories/ipasset.repository';
 import { ENV_CONFIG } from '../shared/services/config.service';
-import { Contract } from '../web3';
-import IPAssetRegistryABI from '../web3/ABI/IPAssetRegistry.json';
-import { AbiItem } from 'web3-utils';
-import { CommonService } from './common.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 

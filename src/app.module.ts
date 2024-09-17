@@ -3,9 +3,9 @@ import { BullModule } from '@nestjs/bull';
 import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
-import { BlockSync, IPAassets, IPAssetData } from './entities';
+import { BlockSync, IPAssets, IPAssetData, LicenseAttach } from './entities';
 import { BlockSyncRepository } from './repositories/block-sync.repository';
-import { IPAassetsRepository } from './repositories/ipasset.repository';
+import { IPAssetsRepository } from './repositories/ipasset.repository';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
 import { BedrockAgentModule } from './modules/bedrockAgent/bedrockAgent.module';
@@ -30,18 +30,29 @@ import { SyncIpassetProcessor } from './services/processor/sync-ipasset.processo
 import { SyncIpassetDataProcessor } from './services/processor/sync-ipasset-data.processor';
 import { IPAssetDataRepository } from './repositories/ipasset-data.repository';
 import { SyncLicenseProcessor } from './services/processor/sync-license.processor';
+import { LicenseAttachRepository } from './repositories/license-attach.repository';
 
 const controllers = [];
-const entities = [BlockSync, IPAassets, LicenseToken, DisputeRaise, DisputeCancelled, Derivative, IPAssetData];
+const entities = [
+  BlockSync,
+  IPAssets,
+  LicenseToken,
+  DisputeRaise,
+  DisputeCancelled,
+  Derivative,
+  IPAssetData,
+  LicenseAttach,
+];
 
 export const repositories = [
   BlockSyncRepository,
-  IPAassetsRepository,
+  IPAssetsRepository,
   IPAssetDataRepository,
   LicenseTokenRepository,
   DisputeRaiseRepository,
   DisputeCancelledRepository,
   DerivativeRepository,
+  LicenseAttachRepository,
 ];
 
 const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService, SyncDerivativeService];

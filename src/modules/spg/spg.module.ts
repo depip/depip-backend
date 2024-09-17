@@ -6,16 +6,16 @@ import { IPFSService } from '../files/ipfs.service';
 import { IpassetService } from '../ipasset/ipasset.service';
 import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IPAassets } from 'src/entities';
-import { IPAassetsRepository } from 'src/repositories/ipasset.repository';
+import { IPAssets } from 'src/entities';
+import { IPAssetsRepository } from 'src/repositories/ipasset.repository';
 
-export const repositories = [IPAassetsRepository];
+export const repositories = [IPAssetsRepository];
 @Module({
   imports: [
     BullModule.registerQueue({
       name: 'SPG',
     }),
-    TypeOrmModule.forFeature([IPAassets]),
+    TypeOrmModule.forFeature([IPAssets]),
   ],
   providers: [SPGService, IPFSService, IpassetService, SmartAccountService, ...repositories],
   controllers: [SpgController],

@@ -299,4 +299,8 @@ export class BaseRepository<T> {
     expressionMap.valuesSet = values;
     return expressionMap;
   }
+
+  getRepository() {
+    return this._repos;
+  }
 }

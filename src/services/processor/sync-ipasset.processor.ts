@@ -3,16 +3,16 @@ import { ENV_CONFIG } from '../../shared/services/config.service';
 import { Inject, Logger } from '@nestjs/common';
 import { Job, Queue } from 'bull';
 import { Contract } from '../../web3';
-import { IPAassetsRepository } from '../../repositories/ipasset.repository';
+import { IPAssetsRepository } from '../../repositories/ipasset.repository';
 import { CommonService } from '../common.service';
 import IPAssetRegistryABI from '../../web3/ABI/IPAssetRegistry.json';
 import { AbiItem } from 'web3-utils';
-import { IPAassets } from '../../entities';
+import { IPAssets } from '../../entities';
 @Processor({ name: ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC })
 export class SyncIpassetProcessor {
   private readonly _logger = new Logger(SyncIpassetProcessor.name);
   constructor(
-    private ipaassetsRepository: IPAassetsRepository,
+    private ipassetsRepository: IPAssetsRepository,
     private commonService: CommonService,
     @InjectQueue(ENV_CONFIG.IPASSET_DATA_SYNC) private ipassetDataQueue: Queue
   ) {}
@@ -44,10 +44,10 @@ export class SyncIpassetProcessor {
       fromBlock: fromBlock,
       toBlock: toBlock,
     });
-    const ipaassets = [];
+    const ipassets = [];
     newIPassets.map((newIPasset) => {
       try {
-        const ipaasset = new IPAassets();
+        const ipaasset = new IPAssets();
         ipaasset.contract_address = newIPasset.returnValues.tokenContract;
         ipaasset.token_id = newIPasset.returnValues.tokenId;
         ipaasset.chain_id = newIPasset.returnValues.chainId;
@@ -55,19 +55,19 @@ export class SyncIpassetProcessor {
         ipaasset.name = newIPasset.returnValues.name;
         ipaasset.uri = newIPasset.returnValues.uri;
         ipaasset.registration_date = newIPasset.returnValues.registrationDate;
-        ipaassets.push(ipaasset);
+        ipassets.push(ipaasset);
       } catch (error) {
         this._logger.error(`error when generate base blocks:${fromBlock}`, error.stack);
         throw error;
       }
     });
 
-    if (ipaassets.length > 0) {
+    if (ipassets.length > 0) {
       this._logger.log(`Insert data to database`);
-      await this.ipaassetsRepository.insert(ipaassets);
+      await this.ipassetsRepository.insert(ipassets);
 
       await this.ipassetDataQueue.addBulk(
-        ipaassets.map((ipasset) => {
+        ipassets.map((ipasset) => {
           return {
             name: 'createIpAssetData',
             data: {
@@ -85,24 +85,6 @@ export class SyncIpassetProcessor {
           };
         })
       );
-
-      // ipaassets.forEach((ipasset) => {
-      //   this.ipassetDataQueue.add(
-      //     'createIpAssetData',
-      //     {
-      //       ipAssetId: ipasset.id,
-      //       contractAddress: ipasset.contract_address,
-      //       tokenId: ipasset.token_id.toString(),
-      //       ipId: ipasset.ip_id,
-      //       chainId: ipasset.chain_id.toString(),
-      //     },
-      //     {
-      //       removeOnComplete: true,
-      //       attempts: 3,
-      //       backoff: 10000,
-      //     }
-      //   );
-      // });
     }
   }
 }
