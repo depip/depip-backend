@@ -98,7 +98,7 @@ export class ConfigService {
         IPASSET_DATA_SYNC: process.env.IPASSET_DATA_SYNC || 'IPAssetData',
         LICENSE_SYNC: process.env.LICENSE_SYNC || 'License',
         LICENSE_ATTACH_SYNC: process.env.LICENSE_ATTACH_SYNC || 'LicenseAttach',
-        DISPUTE_SYNC: process.env.LICENSE_SYNC || 'Dispute',
+        DISPUTE_SYNC: process.env.DISPUTE_SYNC || 'Dispute',
         DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || 'Derivative',
       },
       PARTICAL_NETWORK: {
