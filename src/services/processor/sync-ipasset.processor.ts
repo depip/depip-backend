@@ -26,10 +26,10 @@ export class SyncIpassetProcessor {
       var fBlock = fromBlock;
       if (isExcute) {
         await this.processBlock(fromBlock, toBlock);
-        this.commonService.updateStatus(toBlock + 1, ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC);
+        await this.commonService.updateStatus(toBlock + 1, ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC);
       }
     } catch (error) {
-      this._logger.log(`error when generate base blocks:${fBlock}`, error.stack);
+      this._logger.error(`error when generate base blocks:${fBlock}`, error.stack);
       throw error;
     }
   }
@@ -44,22 +44,16 @@ export class SyncIpassetProcessor {
       fromBlock: fromBlock,
       toBlock: toBlock,
     });
-    const ipassets = [];
-    newIPassets.map((newIPasset) => {
-      try {
-        const ipaasset = new IPAssets();
-        ipaasset.contract_address = newIPasset.returnValues.tokenContract;
-        ipaasset.token_id = newIPasset.returnValues.tokenId;
-        ipaasset.chain_id = newIPasset.returnValues.chainId;
-        ipaasset.ip_id = newIPasset.returnValues.ipId;
-        ipaasset.name = newIPasset.returnValues.name;
-        ipaasset.uri = newIPasset.returnValues.uri;
-        ipaasset.registration_date = newIPasset.returnValues.registrationDate;
-        ipassets.push(ipaasset);
-      } catch (error) {
-        this._logger.error(`error when generate base blocks:${fromBlock}`, error.stack);
-        throw error;
-      }
+    const ipassets = newIPassets.map((newIPasset) => {
+      const ipasset = new IPAssets();
+      ipasset.contract_address = newIPasset.returnValues.tokenContract;
+      ipasset.token_id = newIPasset.returnValues.tokenId;
+      ipasset.chain_id = newIPasset.returnValues.chainId;
+      ipasset.ip_id = newIPasset.returnValues.ipId;
+      ipasset.name = newIPasset.returnValues.name;
+      ipasset.uri = newIPasset.returnValues.uri;
+      ipasset.registration_date = newIPasset.returnValues.registrationDate;
+      return ipasset;
     });
 
     if (ipassets.length > 0) {
@@ -79,6 +73,7 @@ export class SyncIpassetProcessor {
             },
             options: {
               removeOnComplete: true,
+              removeOnFail: false,
               attempts: 3,
               backoff: 10000,
             },

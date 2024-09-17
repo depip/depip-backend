@@ -6,7 +6,10 @@ import { Queue } from 'bull';
 @Injectable()
 export class SyncLicenseService {
   private readonly _logger = new Logger(SyncLicenseService.name);
-  constructor(@InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC) private licenseQueue: Queue) {
+  constructor(
+    @InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC) private licenseQueue: Queue,
+    @InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_ATTACH_SYNC) private licenseAttachQueue: Queue
+  ) {
     this._logger.log('============== Constructor License Sync Task Service ==============');
     this.licenseQueue.add(
       'syncLicense',
@@ -18,7 +21,7 @@ export class SyncLicenseService {
         },
       }
     );
-    this.licenseQueue.add(
+    this.licenseAttachQueue.add(
       'syncLicenseAttach',
       {},
       {
