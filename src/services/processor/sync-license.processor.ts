@@ -114,9 +114,9 @@ export class SyncLicenseProcessor {
         const licenseAttach = new LicenseAttach();
 
         licenseAttach.caller = newLicenseAttach.returnValues.caller;
-        licenseAttach.ip_id = newLicenseAttach.returnValues.ip_id;
-        licenseAttach.license_template = newLicenseAttach.returnValues.license_template;
-        licenseAttach.license_term_id = newLicenseAttach.returnValues.license_term_id;
+        licenseAttach.ip_id = newLicenseAttach.returnValues.ipId;
+        licenseAttach.license_template = newLicenseAttach.returnValues.licenseTemplate;
+        licenseAttach.license_term_id = newLicenseAttach.returnValues.licenseTermsId;
 
         if (countLicenseAttachesOnIpId[licenseAttach.ip_id] == null) {
           const countAttached = await licenseRegistryContract.methods
@@ -128,17 +128,20 @@ export class SyncLicenseProcessor {
       })
     );
 
-    await Promise.all(
-      Object.keys(countLicenseAttachesOnIpId).map(async (ipId) => {
-        const ipassets = await this.ipAssetRepository.findAll({ ipId: ipId });
-        await this.ipAssetRepository.getRepository().update(
-          { numberLicenseAttached: countLicenseAttachesOnIpId[ipId] },
-          {
-            ip_id: ipId,
-          }
-        );
-      })
-    );
+    try {
+      await Promise.all(
+        Object.keys(countLicenseAttachesOnIpId).map(async (ipId) => {
+          await this.ipAssetRepository.getRepository().update(
+            { number_license_attached: countLicenseAttachesOnIpId[ipId] },
+            {
+              ip_id: ipId,
+            }
+          );
+        })
+      );
+    } catch (error) {
+      this._logger.error(error);
+    }
 
     if (licenseAttaches.length > 0) {
       this._logger.log(`Insert LICENSE ATTACH data to database`);

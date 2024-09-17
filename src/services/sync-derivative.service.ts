@@ -49,7 +49,7 @@ export class SyncDerivativeService {
   async cronSync() {
     // Get the highest block and insert into SyncBlock
     try {
-      const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(ENV_CONFIG.TOKENLICENSE_SYNC);
+      const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(ENV_CONFIG.DERIVATIVE_SYNC);
       var fBlock = fromBlock;
       if (isExcute) {
         await this.processBlock(fromBlock, toBlock);

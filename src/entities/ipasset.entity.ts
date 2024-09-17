@@ -31,5 +31,5 @@ export class IPAssets extends BaseEntityIncrementId {
   ipAssetData: IPAssetData;
 
   @Column({ nullable: true })
-  numberLicenseAttached: number;
+  number_license_attached: number;
 }
