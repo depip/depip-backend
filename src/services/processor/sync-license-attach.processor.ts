@@ -6,7 +6,7 @@ import { Contract } from '../../web3';
 import LicenseModuleABI from '../../web3/ABI/LicenseModule.json';
 import LicenseRegistryABI from '../../web3/ABI/LicenseRegistry.json';
 import { AbiItem } from 'web3';
-import { LicenseAttach } from 'src/entities';
+import { IpAssetStatus, LicenseAttach } from 'src/entities';
 import { LicenseAttachRepository } from 'src/repositories/license-attach.repository';
 import { IPAssetsRepository } from 'src/repositories/ipasset.repository';
 
@@ -23,8 +23,9 @@ export class SyncLicenseAttachProcessor {
   async cronSyncAttach() {
     // Get the highest block and insert into SyncBlock
     try {
-      const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(
-        ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_ATTACH_SYNC
+      var { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(
+        ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_ATTACH_SYNC,
+        [ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC]
       );
       var fBlock = fromBlock;
       if (isExcute) {
@@ -72,24 +73,33 @@ export class SyncLicenseAttachProcessor {
       })
     );
 
-    try {
-      await Promise.all(
-        Object.keys(countLicenseAttachesOnIpId).map(async (ipId) => {
-          await this.ipAssetRepository.getRepository().update(
-            {
-              ip_id: ipId,
-            },
-            { number_license_attached: Number(countLicenseAttachesOnIpId[ipId]) }
-          );
-        })
-      );
-    } catch (error) {
-      this._logger.error(error);
-    }
-
     if (licenseAttaches.length > 0) {
       this._logger.log(`Insert LICENSE ATTACH data to database`);
       await this.licenseAttachRepository.insert(licenseAttaches);
+
+      try {
+        await Promise.all([
+          ...Object.keys(countLicenseAttachesOnIpId).map(async (ipId) => {
+            await this.ipAssetRepository.getRepository().update(
+              {
+                ip_id: ipId,
+              },
+              { number_license_attached: Number(countLicenseAttachesOnIpId[ipId]) }
+            );
+          }),
+          ...Object.keys(countLicenseAttachesOnIpId).map(async (ipId) => {
+            await this.ipAssetRepository.getRepository().update(
+              {
+                ip_id: ipId,
+                status: IpAssetStatus.REGISTERED,
+              },
+              { status: IpAssetStatus.LICENSE_ATTACHED }
+            );
+          }),
+        ]);
+      } catch (error) {
+        this._logger.error(error);
+      }
     }
   }
 }

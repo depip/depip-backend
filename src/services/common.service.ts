@@ -5,6 +5,7 @@ import { firstValueFrom, from } from 'rxjs';
 import { getLastestBlockNumber } from 'src/web3';
 import { ENV_CONFIG } from '../shared/services/config.service';
 import { HttpService } from '@nestjs/axios';
+import { In } from 'typeorm';
 @Injectable()
 export class CommonService {
   private readonly _logger = new Logger(CommonService.name);
@@ -32,12 +33,11 @@ export class CommonService {
     }
   }
 
-  async getBlocks(contract) {
+  async getBlocks(contract: string, jobsNeedRunAfter: string[] = []) {
     const [lastBlock, currentBlock] = await Promise.all([
       (await this.blockSyncRepository.findOne({ contract: contract })).last_block || 0,
       getLastestBlockNumber(),
     ]);
-
     var toBlock = Number(currentBlock);
     var fromBlock = Number(currentBlock) - 100;
 
@@ -48,7 +48,22 @@ export class CommonService {
     if (toBlock > currentBlock) {
       toBlock = Number(currentBlock);
     }
-    var isExcute = currentBlock > fromBlock;
+
+    if (jobsNeedRunAfter.length > 0) {
+      const jobsNeed = await this.blockSyncRepository.find({
+        where: {
+          contract: In(jobsNeedRunAfter),
+        },
+        order: {
+          last_block: 'ASC',
+        },
+      });
+      if (toBlock > jobsNeed[0].last_block - 1) {
+        toBlock = jobsNeed[0].last_block - 1;
+      }
+    }
+
+    var isExcute = fromBlock < currentBlock && fromBlock <= toBlock;
     return { fromBlock, toBlock, isExcute };
   }
 

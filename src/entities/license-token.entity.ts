@@ -1,5 +1,6 @@
-import { Column, Entity, Index, Unique } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { BaseEntityIncrementId } from './base/base.entity';
+import { IPAssets } from './ipasset.entity';
 
 @Entity('licensetoken')
 @Unique(['id'])
@@ -19,4 +20,8 @@ export class LicenseToken extends BaseEntityIncrementId {
   @Column()
   @Index()
   licensor_ip_id: string;
+
+  @ManyToOne(() => IPAssets, { createForeignKeyConstraints: false })
+  @JoinColumn([{ name: 'licensor_ip_id', referencedColumnName: 'ip_id' }])
+  ipasset: IPAssets;
 }
