@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IpassetService } from './ipasset.service';
 import { IpassetInput } from './dto/ipasset-input.dto';
+import { GetIpassetInput } from './dto/get-ipasset.dto';
 
 @Controller('ipasset')
 @ApiTags('ipasset')
@@ -15,13 +16,26 @@ export class IpassetController {
     // return this.ipassetSvc.registerIpassetOld(data.nftAddress, data.tokenId);
   }
 
+  // @Get()
+  // getIpAsset(
+  //   @Query('owner') owner: string,
+  //   @Query('chainId') chainId: string,
+  //   @Query('pageLimit') pageLimit: string,
+  //   @Query('pageOffset') pageOffset: string,
+  //   @Query('order') order: string = 'DESC'
+  // ) {
+  //   return this.ipassetSvc.getIpAsset(owner, chainId, Number(pageLimit), Number(pageOffset));
+  // }
+
   @Get()
-  getIpAsset(
-    @Query('owner') owner: string,
-    @Query('chainId') chainId: string,
-    @Query('pageLimit') pageLimit: string,
-    @Query('pageOffset') pageOffset: string
-  ) {
-    return this.ipassetSvc.getIpAsset(owner, chainId, Number(pageLimit), Number(pageOffset));
+  getIpAsset(@Query() query: GetIpassetInput) {
+    return this.ipassetSvc.getIpAsset(
+      query.owner,
+      query.chainId,
+      Number(query.pageLimit),
+      Number(query.pageOffset),
+      query.order,
+      query.status
+    );
   }
 }

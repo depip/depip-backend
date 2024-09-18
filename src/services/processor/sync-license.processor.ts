@@ -7,18 +7,26 @@ import { Contract } from '../../web3';
 import LicenseTokenABI from '../../web3/ABI/LicenseToken.json';
 import { LicenseToken } from '../../entities/license-token.entity';
 import { AbiItem } from 'web3';
+import { IPAssetsRepository } from 'src/repositories';
+import { In, Not } from 'typeorm';
+import { IpAssetStatus } from 'src/entities';
 
 @Processor({ name: ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC })
 export class SyncLicenseProcessor {
   private readonly _logger = new Logger(SyncLicenseProcessor.name);
-  constructor(private licenseTokenRepository: LicenseTokenRepository, private commonService: CommonService) {}
+  constructor(
+    private licenseTokenRepository: LicenseTokenRepository,
+    private ipassetsRepository: IPAssetsRepository,
+    private commonService: CommonService
+  ) {}
 
   @Process({ name: 'syncLicense', concurrency: 1 })
   async cronSync() {
     // Get the highest block and insert into SyncBlock
     try {
       const { fromBlock, toBlock, isExcute } = await this.commonService.getBlocks(
-        ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC
+        ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC,
+        [ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC]
       );
       var fBlock = fromBlock;
       if (isExcute) {
@@ -42,6 +50,7 @@ export class SyncLicenseProcessor {
       fromBlock: fromBlock,
       toBlock: toBlock,
     });
+    const listLicensorIpId: any = {};
     const licenseTokens = await Promise.all(
       newLicenseTokens.map(async (newLicenseToken) => {
         const licenseToken = new LicenseToken();
@@ -55,13 +64,24 @@ export class SyncLicenseProcessor {
           throw Error('licensor ip id is not string');
         }
         licenseToken.licensor_ip_id = licensorIpId;
+        listLicensorIpId[licensorIpId] = true;
         return licenseToken;
       })
     );
 
     if (licenseTokens.length > 0) {
       this._logger.log(`Insert LICENSE TOKEN data to database`);
-      await this.licenseTokenRepository.upsert(licenseTokens, ['id']);
+      await this.licenseTokenRepository.insert(licenseTokens);
+
+      await this.ipassetsRepository.getRepository().update(
+        {
+          ip_id: In(Object.keys(listLicensorIpId)),
+          status: Not(IpAssetStatus.LICENSE_TOKEN_MINTED),
+        },
+        {
+          status: IpAssetStatus.LICENSE_TOKEN_MINTED,
+        }
+      );
     }
   }
 }

@@ -1,6 +1,13 @@
-import { Column, Entity, Index, JoinColumn, OneToOne, Unique } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, Unique } from 'typeorm';
 import { BaseEntityIncrementId } from './base/base.entity';
 import { IPAssetData } from './ipasset-data.entity';
+import { LicenseToken } from './license-token.entity';
+
+export enum IpAssetStatus {
+  REGISTERED = 'REGISTERED',
+  LICENSE_ATTACHED = 'LICENSE_ATTACHED',
+  LICENSE_TOKEN_MINTED = 'LICENSE_TOKEN_MINTED',
+}
 
 @Entity('ipasset')
 @Unique(['id'])
@@ -32,4 +39,11 @@ export class IPAssets extends BaseEntityIncrementId {
 
   @Column({ nullable: true })
   number_license_attached: number;
+
+  @OneToMany(() => LicenseToken, (licenseToken) => licenseToken.ipasset)
+  licenseTokens: LicenseToken[];
+
+  @Column({ type: 'enum', enum: IpAssetStatus, default: IpAssetStatus.REGISTERED })
+  @Index()
+  status: string;
 }

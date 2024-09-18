@@ -7,7 +7,7 @@ import { IPAssetsRepository } from '../../repositories/ipasset.repository';
 import { CommonService } from '../common.service';
 import IPAssetRegistryABI from '../../web3/ABI/IPAssetRegistry.json';
 import { AbiItem } from 'web3-utils';
-import { IPAssets } from '../../entities';
+import { IPAssets, IpAssetStatus } from '../../entities';
 @Processor({ name: ENV_CONFIG.STORY_PROTOCOL_SYNC.IPASSET_SYNC })
 export class SyncIpassetProcessor {
   private readonly _logger = new Logger(SyncIpassetProcessor.name);
@@ -53,6 +53,7 @@ export class SyncIpassetProcessor {
       ipasset.name = newIPasset.returnValues.name;
       ipasset.uri = newIPasset.returnValues.uri;
       ipasset.registration_date = newIPasset.returnValues.registrationDate;
+      ipasset.status = IpAssetStatus.REGISTERED;
       return ipasset;
     });
 

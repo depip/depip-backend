@@ -216,17 +216,28 @@ export class IpassetService {
     }
   }
 
-  async getIpAsset(owner: string, chainId: string, pageLimit: number, pageOffset: number) {
+  async getIpAsset(
+    owner: string,
+    chainId: string,
+    pageLimit: number,
+    pageOffset: number,
+    order: string,
+    status: string
+  ) {
     try {
-      const res = await this.ipassetsRepository.find({
-        where: {
-          chain_id: chainId,
-          ipAssetData: {
-            owner: owner,
-          },
+      const whereCondition: any = {
+        chain_id: chainId,
+        ipAssetData: {
+          owner: owner,
         },
+      };
+      if (status) {
+        whereCondition.status = status;
+      }
+      const res = await this.ipassetsRepository.find({
+        where: whereCondition,
         order: {
-          id: 'DESC',
+          id: order === 'ASC' ? 'ASC' : 'DESC',
         },
         take: pageLimit,
         skip: pageOffset,
