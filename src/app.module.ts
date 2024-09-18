@@ -12,6 +12,7 @@ import {
   Derivative,
   LicenseToken,
   DisputeRaise,
+  LicenseTerm,
 } from './entities';
 import {
   BlockSyncRepository,
@@ -22,6 +23,7 @@ import {
   DerivativeRepository,
   IPAssetDataRepository,
   LicenseAttachRepository,
+  LicenseTermRepository,
 } from './repositories';
 import { ConfigService, ENV_CONFIG } from './shared/services/config.service';
 import { SharedModule } from './shared/shared.module';
@@ -40,9 +42,10 @@ import {
   SyncLicenseProcessor,
   SyncIpassetProcessor,
   SyncLicenseAttachProcessor,
+  SyncDerivativeProcessor,
+  SyncDisputeProcessor,
+  SyncLicenseTermProcessor,
 } from './services/processor';
-import { SyncDerivativeProcessor } from './services/processor/sync-derivative.processor';
-import { SyncDisputeProcessor } from './services/processor/sync-dispute.processor';
 
 const controllers = [];
 const entities = [
@@ -54,6 +57,7 @@ const entities = [
   Derivative,
   IPAssetData,
   LicenseAttach,
+  LicenseTerm,
 ];
 
 export const repositories = [
@@ -65,6 +69,7 @@ export const repositories = [
   DisputeCancelledRepository,
   DerivativeRepository,
   LicenseAttachRepository,
+  LicenseTermRepository,
 ];
 
 const services = [CommonService, SyncIPAssetService, SyncLicenseService, SyncDisputeService, SyncDerivativeService];
@@ -76,6 +81,7 @@ const processors = [
   SyncLicenseAttachProcessor,
   SyncDerivativeProcessor,
   SyncDisputeProcessor,
+  SyncLicenseTermProcessor,
 ];
 
 @Module({
@@ -124,6 +130,10 @@ const processors = [
       {
         name: ENV_CONFIG.STORY_PROTOCOL_SYNC.DISPUTE_SYNC,
         processors: ['./src/services/processor/sync-dispute.processor.ts'],
+      },
+      {
+        name: ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_TERM_SYNC,
+        processors: ['./src/services/processor/sync-license-term.processor.ts'],
       }
     ),
     CacheModule.register({ ttl: 10000 }),

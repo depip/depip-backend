@@ -6,3 +6,4 @@ export * from './ipasset-data.repository';
 export * from './ipasset.repository';
 export * from './license-attach.repository';
 export * from './licensetoken.repository';
+export * from './license-term.repository';

@@ -54,6 +54,7 @@ export class ConfigService {
       TIME_SYNC_DISPUTE: Number(process.env.TIME_SYNC_DISPUTE) || 10000,
       DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || 'Derivative',
       TIME_SYNC_DERIVATIVE: Number(process.env.TIME_SYNC_DERIVATIVE) || 10000,
+      TIME_SYNC_LICENSE_TERM: Number(process.env.TIME_SYNC_LICENSE_TERM) || 10000,
       SYNC_TRANSACTIONS_CLEAN_UP_DAY: Number(process.env.SYNC_TRANSACTIONS_CLEAN_UP_DAY || 8),
       KEY_BASE_URL: process.env.KEY_BASE_URL,
       PRICE_HOST_SYNC: process.env.PRICE_HOST_SYNC || 'COINGECKO',
@@ -100,6 +101,7 @@ export class ConfigService {
         LICENSE_ATTACH_SYNC: process.env.LICENSE_ATTACH_SYNC || 'LicenseAttach',
         DISPUTE_SYNC: process.env.DISPUTE_SYNC || 'Dispute',
         DERIVATIVE_SYNC: process.env.DERIVATIVE_SYNC || 'Derivative',
+        LICENSE_TERM_SYNC: process.env.LICENSE_TERM_SYNC || 'LicenseTerm',
       },
       PARTICAL_NETWORK: {
         PARTICAL_RPC_URL: process.env.PARTICAL_RPC_URL || 'https://rpc.particle.network/evm-chain?chainId=',
