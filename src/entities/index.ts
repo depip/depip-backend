@@ -6,3 +6,4 @@ export * from './derivative.entity';
 export * from './dispute-raise.entity';
 export * from './dispute-cancelled.entity';
 export * from './license-token.entity';
+export * from './license-term.entity';

@@ -8,7 +8,8 @@ export class SyncLicenseService {
   private readonly _logger = new Logger(SyncLicenseService.name);
   constructor(
     @InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_SYNC) private licenseQueue: Queue,
-    @InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_ATTACH_SYNC) private licenseAttachQueue: Queue
+    @InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_ATTACH_SYNC) private licenseAttachQueue: Queue,
+    @InjectQueue(ENV_CONFIG.STORY_PROTOCOL_SYNC.LICENSE_TERM_SYNC) private licenseTermQueue: Queue
   ) {
     this._logger.log('============== Constructor License Sync Task Service ==============');
     this.licenseQueue.add(
@@ -28,6 +29,16 @@ export class SyncLicenseService {
         removeOnComplete: true,
         repeat: {
           every: ENV_CONFIG.TIME_SYNC_LICENSE_ATTACH,
+        },
+      }
+    );
+    this.licenseTermQueue.add(
+      'syncLicenseTerm',
+      {},
+      {
+        removeOnComplete: true,
+        repeat: {
+          every: ENV_CONFIG.TIME_SYNC_LICENSE_TERM,
         },
       }
     );
