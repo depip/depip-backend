@@ -1,5 +1,6 @@
-import { Column, Entity, Index, Unique } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToOne, Unique } from 'typeorm';
 import { BaseEntityIncrementId } from './base/base.entity';
+import { LicenseAttach } from './license-attach.entity';
 
 @Entity('license_term')
 export class LicenseTerm extends BaseEntityIncrementId {
@@ -16,4 +17,10 @@ export class LicenseTerm extends BaseEntityIncrementId {
 
   @Column({ nullable: true })
   name: string;
+
+  @OneToOne(() => LicenseAttach, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn([{ name: 'license_term_id', referencedColumnName: 'license_term_id' }])
+  license_attach: LicenseAttach;
 }

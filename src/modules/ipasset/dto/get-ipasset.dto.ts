@@ -22,4 +22,9 @@ export class GetIpassetInput {
     enum: IpAssetStatus,
   })
   status: string;
+
+  @ApiProperty({
+    required: false,
+  })
+  ipId: string;
 }

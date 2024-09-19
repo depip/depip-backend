@@ -2,6 +2,7 @@ import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, Unique } from '
 import { BaseEntityIncrementId } from './base/base.entity';
 import { IPAssetData } from './ipasset-data.entity';
 import { LicenseToken } from './license-token.entity';
+import { LicenseAttach } from './license-attach.entity';
 
 export enum IpAssetStatus {
   REGISTERED = 'REGISTERED',
@@ -46,4 +47,7 @@ export class IPAssets extends BaseEntityIncrementId {
   @Column({ type: 'enum', enum: IpAssetStatus, default: IpAssetStatus.REGISTERED })
   @Index()
   status: string;
+
+  @OneToMany(() => LicenseAttach, (licenseAttach) => licenseAttach.ip_asset)
+  license_attaches: LicenseAttach[];
 }

@@ -35,7 +35,8 @@ export class IpassetController {
       Number(query.pageLimit),
       Number(query.pageOffset),
       query.order,
-      query.status
+      query.status,
+      query.ipId
     );
   }
 }

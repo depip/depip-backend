@@ -222,7 +222,8 @@ export class IpassetService {
     pageLimit: number,
     pageOffset: number,
     order: string,
-    status: string
+    status: string,
+    ipId: string
   ) {
     try {
       const whereCondition: any = {
@@ -234,6 +235,11 @@ export class IpassetService {
       if (status) {
         whereCondition.status = status;
       }
+      const relations = ['ipAssetData'];
+      if (ipId) {
+        whereCondition.ip_id = ipId;
+        relations.push('license_attaches', 'license_attaches.license_term');
+      }
       const res = await this.ipassetsRepository.find({
         where: whereCondition,
         order: {
@@ -241,7 +247,7 @@ export class IpassetService {
         },
         take: pageLimit,
         skip: pageOffset,
-        relations: ['ipAssetData'],
+        relations,
       });
       return res;
     } catch (error) {
