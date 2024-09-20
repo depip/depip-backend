@@ -21,7 +21,7 @@ export class CommonService {
    * @param newLastBlock
    */
   async updateStatus(newLastBlock, id) {
-    const lastBlock = await this.blockSyncRepository.findOne({ contract: id });
+    const lastBlock = await this.blockSyncRepository.findOne({ where: { contract: id } });
     if (!lastBlock) {
       const blockSync = new BlockSync();
       blockSync.contract = id;
@@ -35,7 +35,7 @@ export class CommonService {
 
   async getBlocks(contract: string, jobsNeedRunAfter: string[] = []) {
     const [lastBlock, currentBlock] = await Promise.all([
-      (await this.blockSyncRepository.findOne({ contract: contract })).last_block || 0,
+      (await this.blockSyncRepository.findOne({ where: { contract: contract } })).last_block || 0,
       getLastestBlockNumber(),
     ]);
     var toBlock = Number(currentBlock);

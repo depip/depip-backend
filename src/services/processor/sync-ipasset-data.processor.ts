@@ -83,7 +83,7 @@ export class SyncIpassetDataProcessor {
     };
     const response = await this.commonService.fetchDataHoroscope(query);
     if (response.data[horoscopeChainDB].erc721_token.length > 0) {
-      const ipAssetDataDB = await this.ipAssetDataRepository.findOne(job.data.ipAssetDataId);
+      const ipAssetDataDB = await this.ipAssetDataRepository.findOne({ where: { id: job.data.ipAssetDataId } });
       if (ipAssetDataDB) {
         ipAssetDataDB.metadata_onchain = response.data[horoscopeChainDB].erc721_token[0].media_info?.onchain;
         ipAssetDataDB.metadata_offchain = response.data[horoscopeChainDB].erc721_token[0].media_info?.offchain;
