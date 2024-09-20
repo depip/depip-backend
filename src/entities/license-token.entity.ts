@@ -17,7 +17,7 @@ export class LicenseToken extends BaseEntityIncrementId {
   @Column()
   signature: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Index()
   licensor_ip_id: string;
 
