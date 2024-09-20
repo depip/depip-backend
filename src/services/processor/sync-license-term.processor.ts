@@ -87,7 +87,7 @@ export class SyncLicenseTermProcessor {
     try {
       const foundDB = await this.licenseTermRepository
         .getRepository()
-        .findOne({ license_term_id: job.data.licenseTermId });
+        .findOne({ where: { license_term_id: job.data.licenseTermId } });
       if (foundDB) {
         this._logger.log(`License term ID ${job.data.licenseTermId} was found on DB`);
         return;

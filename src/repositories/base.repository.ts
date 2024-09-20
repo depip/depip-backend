@@ -25,12 +25,8 @@ export class BaseRepository<T> {
    * @param condition
    * @returns
    */
-  public async findOne(id?: any): Promise<T> {
-    if (id) {
-      return this._repos.findOne(id);
-    } else {
-      return this._repos.findOne();
-    }
+  public async findOne(id: any): Promise<T> {
+    return this._repos.findOne(id);
   }
 
   /**
