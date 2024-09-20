@@ -1,6 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bull';
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from 'nest-schedule';
 import {
@@ -136,7 +136,6 @@ const processors = [
         processors: ['./src/services/processor/sync-license-term.processor.ts'],
       }
     ),
-    CacheModule.register({ ttl: 10000 }),
     SharedModule,
     BedrockAgentModule,
     IpassetModule,
