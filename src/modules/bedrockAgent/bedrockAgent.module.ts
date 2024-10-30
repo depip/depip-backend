@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BedrockAgentService } from './bedrockAgent.service';
 import { BedrockAgentController } from './bedrockAgent.controller';
-import { IpassetService } from '../ipasset/ipasset.service';
 import { BullModule } from '@nestjs/bull';
-import { SmartAccountService } from '../particleAccounts/smartAccount.service';
 
 @Module({
   imports: [
@@ -11,7 +9,7 @@ import { SmartAccountService } from '../particleAccounts/smartAccount.service';
       name: 'BedrockAgent',
     }),
   ],
-  providers: [BedrockAgentService, IpassetService, SmartAccountService],
+  providers: [BedrockAgentService],
   controllers: [BedrockAgentController],
 })
-export class BedrockAgentModule { }
+export class BedrockAgentModule {}
