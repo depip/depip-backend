@@ -5,6 +5,7 @@ import { BadRequestException, ForbiddenException, Injectable, Logger } from '@ne
 import { ENV_CONFIG } from '../../shared/services/config.service';
 import { BedrockAgentRuntimeClient, InvokeAgentCommand } from '@aws-sdk/client-bedrock-agent-runtime';
 import { parse } from 'path';
+import axios from 'axios';
 
 @Injectable()
 export class BedrockAgentService {
@@ -48,6 +49,20 @@ export class BedrockAgentService {
    * @param {string} sessionId - An arbitrary identifier for the session.
    */
   async invokeBedrockAgent(prompt: string, sessionId: string, endSession: boolean) {
+    if (!ENV_CONFIG.BEDROCK.USE_AWS){
+      try {
+        const completion = await axios.post(ENV_CONFIG.BEDROCK.CUSTOM_AGENT_URL, {
+          session_id: sessionId,
+          query: prompt
+        })
+        
+        return { sessionId: sessionId, completion: completion.data };
+      } catch (error) {
+        console.error(error);
+        return error;
+      }
+    }
+    
     const agentId = this._agentId;
     const agentAliasId = this._agentAliasId;
     const command = new InvokeAgentCommand({

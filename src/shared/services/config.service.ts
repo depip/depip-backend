@@ -74,11 +74,13 @@ export class ConfigService {
         CHAINID: process.env.CHAINID,
       },
       BEDROCK: {
+        USE_AWS: process.env.USE_AWS_BEDROCK === 'true' ? true : false,
         REGION: process.env.REGION,
         ACCESSKEY: process.env.ACCESSKEY,
         SECRET: process.env.SECRET,
         AGENTID: process.env.AGENTID,
         AGENTALIASID: process.env.AGENTALIASID,
+        CUSTOM_AGENT_URL: process.env.CUSTOM_AGENT_URL,
       },
       STORY_PROTOCOL_CONTRACT: {
         IPASSET: process.env.IPASSET_ADDRESS,
